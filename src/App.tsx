@@ -1,11 +1,12 @@
-import { Box, Center, Container, Heading } from "@chakra-ui/react";
+import { Flex, useColorModeValue } from "@chakra-ui/react";
 import React from "react";
+import SigninCard from "./pages/SigninCard";
 
 function App() {
   return (
-    <Box height={"100vh"} justifyContent={"center"} alignItems={"center"} display="flex">
-      <Heading textTransform={"uppercase"}>This app is using Chakra UI</Heading>
-    </Box>
+    <Flex minH={"100vh"} align={"center"} justify={"center"} bg={useColorModeValue("gray.50", "gray.800")}>
+      <SigninCard />
+    </Flex>
   );
 }
 

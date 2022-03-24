@@ -1,7 +1,5 @@
 import { faker } from "@faker-js/faker";
 import fs from "fs";
-// console.log(faker.helpers.userCard());
-// console.log(faker.name.jobType());
 
 function randomJobList(length) {
   const jobList = [];
