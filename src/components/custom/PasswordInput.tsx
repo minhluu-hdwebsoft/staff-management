@@ -1,4 +1,4 @@
-import { Button, Input, InputGroup, InputProps, InputRightElement } from "@chakra-ui/react";
+import { Button, Input, InputProps, InputRightElement } from "@chakra-ui/react";
 import React from "react";
 
 export const PasswordInput = (props: InputProps) => {
