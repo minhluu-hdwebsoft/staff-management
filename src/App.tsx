@@ -1,7 +1,4 @@
-import { Flex, useColorModeValue } from "@chakra-ui/react";
 import React from "react";
-import { MainLayout } from "./pages/MainLayout";
-import SigninCard from "./modules/Auth/Form/SigninCard";
 import { AppRoutes } from "./Routes";
 
 function App() {

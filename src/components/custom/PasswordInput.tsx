@@ -8,7 +8,7 @@ export const PasswordInput = (props: InputProps) => {
   return (
     <>
       <Input type={show ? "text" : "password"} {...props} placeholder=" " />
-      <InputRightElement width="4.5rem" height={"100%"}>
+      <InputRightElement width="4.5rem" height={"38px"}>
         <Button h="1.75rem" size="sm" onClick={handleClick}>
           {show ? "Hide" : "Show"}
         </Button>

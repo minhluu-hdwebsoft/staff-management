@@ -17,10 +17,24 @@ import {
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { Children, ReactElement } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../modules/Auth/context";
 
-export const MainLayout = () => {
+interface MainLayoutProps {
+  children?: ReactElement;
+}
+
+export const MainLayout = (props: MainLayoutProps) => {
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleSignoutClick = () => {
+    signOut();
+    navigate("/");
+  };
+
   return (
     <VStack align="stretch" divider={<StackDivider borderColor="gray.200" />}>
       <Flex px={7} justifyContent={"end"}>
@@ -45,7 +59,7 @@ export const MainLayout = () => {
             <MenuItem>Profile</MenuItem>
             <MenuItem>Settings</MenuItem>
             <MenuDivider />
-            <MenuItem>Sign out</MenuItem>
+            <MenuItem onClick={handleSignoutClick}>Sign out</MenuItem>
           </MenuList>
         </Menu>
       </Flex>
@@ -56,6 +70,7 @@ export const MainLayout = () => {
           </InputLeftElement>
           <Input type="text" placeholder="Search ..." />
         </InputGroup>
+        {props.children}
       </Stack>
     </VStack>
   );

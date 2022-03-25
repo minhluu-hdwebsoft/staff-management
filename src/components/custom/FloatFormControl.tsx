@@ -12,10 +12,10 @@ interface FloatFormControlProps {
 }
 
 export const FloatFormControl = (props: FloatFormControlProps) => {
-  const { helperText, label, errorMessage, children, id, ...rest } = props;
+  const { helperText, label, errorMessage, children, isInvaild, id, ...rest } = props;
 
   return (
-    <FormControl variant="floating" id={id} {...rest}>
+    <FormControl variant="floating" id={id} {...rest} isInvalid={Boolean(errorMessage) || isInvaild}>
       {/* <Input type={type} name={name} placeholder={placeholder || " "} value={value} defaultValue={defaultValue || ""} /> */}
       {/* It is important that the Label comes after the Control due to css selectors */}
       {children}
