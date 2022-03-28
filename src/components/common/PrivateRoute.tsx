@@ -4,9 +4,9 @@ import { useAuth } from "../../modules/Auth/context";
 import { MainLayout } from "../layout/MainLayout";
 
 export const PrivateRoute = () => {
-  const { isLogin } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  if (!isLogin) {
+  if (!isAuthenticated) {
     return <Navigate to={"/sign-in"} />;
   }
 

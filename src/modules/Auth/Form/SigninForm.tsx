@@ -1,39 +1,44 @@
 import { Button, Input, Link, Stack, Text } from "@chakra-ui/react";
-import React, { FormEvent, useState } from "react";
-import { Link as ReactLink, useNavigate } from "react-router-dom";
+import React from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { Link as ReactLink } from "react-router-dom";
 import { FloatFormControl, PasswordInput } from "../../../components/custom";
 import { useAuth } from "../context";
 
-export default function SigninForm() {
+interface SigninType {
+  email: string;
+  password: string;
+}
+
+export default function SigninForm(): JSX.Element {
   const { signIn } = useAuth();
-  const navigate = useNavigate();
-  const [isSubmiting, setIsSubmiting] = useState(false);
 
-  const handleSubmit = (e: FormEvent | undefined) => {
-    e?.preventDefault();
+  const {
+    handleSubmit,
+    register,
+    formState: { errors, isSubmitting },
+  } = useForm<SigninType>();
 
-    console.log("Sign in");
-    setIsSubmiting(true);
-    setTimeout(() => {
-      signIn();
-      setIsSubmiting(false);
-      navigate("/admin");
-    }, 3000);
+  const onSubmit: SubmitHandler<SigninType> = async (values) => {
+    await signIn(values.email, values.password);
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={5}>
-        <FloatFormControl label="Email" id="email">
-          <Input placeholder=" " />
+        <FloatFormControl label="Email" id="email" errorMessage={errors.email?.message}>
+          <Input placeholder=" " {...register("email", { required: "This is required" })} />
         </FloatFormControl>
-        <FloatFormControl label="Password" id="password">
-          <PasswordInput />
+        <FloatFormControl label="Password" id="password" errorMessage={errors.password?.message}>
+          <PasswordInput
+            placeholder=" "
+            inputRegister={{ ...register("password", { required: "This is required" }) }}
+          />
         </FloatFormControl>
         <Stack spacing={10} pt={2}>
           <Button
             type="submit"
-            isLoading={isSubmiting}
+            isLoading={isSubmitting}
             loadingText="Submitting"
             size="lg"
             bg={"blue.400"}

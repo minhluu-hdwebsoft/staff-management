@@ -6,16 +6,17 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { theme } from "./theme";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./modules/Auth/context";
+import "./utils/i18n.ts";
 
 ReactDOM.render(
   <React.StrictMode>
-    <AuthProvider>
-      <ChakraProvider theme={theme}>
-        <BrowserRouter>
+    <ChakraProvider theme={theme}>
+      <BrowserRouter>
+        <AuthProvider>
           <App />
-        </BrowserRouter>
-      </ChakraProvider>
-    </AuthProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ChakraProvider>
   </React.StrictMode>,
   document.getElementById("root"),
 );
