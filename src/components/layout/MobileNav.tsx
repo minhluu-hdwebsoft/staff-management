@@ -17,6 +17,7 @@ import {
 import React from "react";
 import { FiChevronDown, FiMenu } from "react-icons/fi";
 import { useAuth } from "../../modules/Auth/context";
+import ColorSwitchButton from "./ColorSwitchButton";
 import LanguageMenu from "./LanguageMenu";
 
 interface MobileProps extends FlexProps {
@@ -55,6 +56,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       </Text>
 
       <HStack spacing={{ base: "0", md: "6" }}>
+        <ColorSwitchButton />
         <LanguageMenu />
         <Flex alignItems={"center"}>
           <Menu>
@@ -63,9 +65,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                 <Avatar size={"sm"} src={currentUser?.avatar} />
                 <VStack display={{ base: "none", md: "flex" }} alignItems="flex-start" spacing="1px" ml="2">
                   <Text fontSize="sm">{currentUser?.display_name || currentUser?.username}</Text>
-                  <Text fontSize="xs" color="gray.600">
-                    {currentUser?.email}
-                  </Text>
+                  <Text fontSize="xs">{currentUser?.email}</Text>
                 </VStack>
                 <Box display={{ base: "none", md: "flex" }}>
                   <FiChevronDown />

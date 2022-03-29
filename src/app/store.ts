@@ -1,8 +1,18 @@
 import { configureStore } from "@reduxjs/toolkit";
+import createSagaMiddleware from "redux-saga";
+import employeeSaga from "../modules/Employee/saga";
+import employeeReducer from "../modules/Employee/slice";
 
-const store = configureStore({
-  reducer: {},
+const saga = createSagaMiddleware();
+
+export const store = configureStore({
+  reducer: {
+    employee: employeeReducer,
+  },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(saga),
 });
+
+saga.run(employeeSaga);
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;

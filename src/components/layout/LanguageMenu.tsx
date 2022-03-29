@@ -1,7 +1,6 @@
-import { Avatar, Flex, HStack, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react";
+import { Avatar, HStack, IconButton, Menu, MenuButton, MenuItem, MenuList, Text } from "@chakra-ui/react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { FiBell } from "react-icons/fi";
 
 interface LanguageItem {
   // id: "vn" | "en";

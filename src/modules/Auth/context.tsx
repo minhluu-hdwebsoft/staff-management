@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useToast } from "@chakra-ui/react";
 import { UserRegisterParams } from "@hdwebsoft/intranet-api-sdk/libs/api/auth/models";
 import { User } from "@hdwebsoft/intranet-api-sdk/libs/api/user/models";
 import React, { ReactElement, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
+import { LoadingPage } from "../../components/common/LoadingPage";
 
 interface AuthContextType {
   currentUser: User | undefined;
@@ -13,6 +15,7 @@ interface AuthContextType {
   register: (values: UserRegisterParams) => Promise<void>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 const AuthContext = React.createContext<AuthContextType>(null!);
 
 export const AuthProvider = ({ children }: { children: ReactElement }) => {
@@ -22,13 +25,15 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
   const currentUser = useRef<User>();
   const isAuthenticated = useRef<boolean>(false);
 
-  // console.log(navigate("/"));
-
   useEffect(() => {
     async function getAuthenticate() {
       try {
-        isAuthenticated.current = await api.auth.isAuthenticated();
-        currentUser.current = await api.user.me();
+        if (await api.auth.getAuthToken()) {
+          await api.auth.refreshToken();
+        }
+        const [isAuth, user] = await Promise.all([api.auth.isAuthenticated(), api.user.me()]);
+        isAuthenticated.current = isAuth;
+        currentUser.current = user;
       } catch (error) {
         isAuthenticated.current = false;
       } finally {
@@ -49,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
       await api.auth.login(username, password);
       isAuthenticated.current = true;
       currentUser.current = await api.user.me();
-      navigate("/admin");
+      navigate("/");
       toast({
         title: "Sign in Success",
         description: "Welcome to Staff Management System",
@@ -100,7 +105,7 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
   };
 
   if (!isLoadingUser) {
-    return <h1>Loading</h1>;
+    return <LoadingPage />;
   }
 
   return (
@@ -121,20 +126,3 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
 export const useAuth = () => {
   return useContext(AuthContext);
 };
-
-// export const useDisclosure = (defaultValue: boolean) => {
-//   const [isOpen, setIsOpen] = useState(defaultValue || false);
-
-//   const onOpen = () => {
-//     setIsOpen(true);
-//   };
-//   const onClose = () => {
-//     setIsOpen(false);
-//   };
-
-//   return {
-//     isOpen,
-//     onOpen,
-//     onClose,
-//   };
-// };

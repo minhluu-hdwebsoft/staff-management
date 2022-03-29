@@ -2,14 +2,17 @@ import { Flex, FlexProps, Icon, Link } from "@chakra-ui/react";
 import { TFunctionResult } from "i18next";
 import React, { ReactText } from "react";
 import { IconType } from "react-icons";
+import { Link as ReactRouterLink } from "react-router-dom";
 
 interface NavItemProps extends FlexProps {
   icon: IconType;
   children: ReactText | string | TFunctionResult;
+  to?: string;
+  isActive: boolean;
 }
-const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
+const NavItem = ({ to, icon, children, isActive = false, ...rest }: NavItemProps) => {
   return (
-    <Link href="#" style={{ textDecoration: "none" }} _focus={{ boxShadow: "none" }}>
+    <Link as={ReactRouterLink} to={to || "#"} style={{ textDecoration: "none" }} _focus={{ boxShadow: "none" }}>
       <Flex
         align="center"
         p="4"
@@ -21,6 +24,16 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
           bg: "cyan.400",
           color: "white",
         }}
+        __css={
+          isActive
+            ? {
+                bg: "cyan.400",
+                color: "white",
+              }
+            : {
+                transition: "0.1s ease",
+              }
+        }
         {...rest}
       >
         {icon && (

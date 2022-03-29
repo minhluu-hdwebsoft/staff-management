@@ -1,7 +1,8 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../modules/Auth/context";
 import { MainLayout } from "../layout/MainLayout";
+import { LoadingPage } from "./LoadingPage";
 
 export const PrivateRoute = () => {
   const { isAuthenticated } = useAuth();
@@ -12,7 +13,9 @@ export const PrivateRoute = () => {
 
   return (
     <MainLayout>
-      <Outlet />
+      <Suspense fallback={<LoadingPage />}>
+        <Outlet />
+      </Suspense>
     </MainLayout>
   );
 };
