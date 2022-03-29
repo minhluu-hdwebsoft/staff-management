@@ -7,9 +7,11 @@ import { theme } from "./theme";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./modules/Auth/context";
 import "./utils/i18n.ts";
+import { Provider } from "react-redux";
+import { store } from "./app/store";
 
 ReactDOM.render(
-  <React.StrictMode>
+  <Provider store={store}>
     <ChakraProvider theme={theme}>
       <BrowserRouter>
         <AuthProvider>
@@ -17,7 +19,7 @@ ReactDOM.render(
         </AuthProvider>
       </BrowserRouter>
     </ChakraProvider>
-  </React.StrictMode>,
+  </Provider>,
   document.getElementById("root"),
 );
 

@@ -10,30 +10,33 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import React, { ReactNode } from "react";
-import { FiCompass, FiHome, FiSettings, FiStar, FiTrendingUp } from "react-icons/fi";
-import { IconType } from "react-icons";
-import NavItem from "./NavItem";
-import MobileNav from "./MobileNav";
 import { useTranslation } from "react-i18next";
+import { IconType } from "react-icons";
+import { FiCompass, FiHome, FiTrendingUp } from "react-icons/fi";
+import { useLocation } from "react-router-dom";
+import MobileNav from "./MobileNav";
+import NavItem from "./NavItem";
 
 interface LinkItemProps {
   name: string;
   icon: IconType;
+  key: string;
 }
 
 const LinkItems: Array<LinkItemProps> = [
-  { name: "dashboard", icon: FiHome },
-  { name: "employee", icon: FiTrendingUp },
-  { name: "task", icon: FiCompass },
+  { name: "dashboard", icon: FiHome, key: "" },
+  { name: "employee", icon: FiTrendingUp, key: "employee" },
+  { name: "task", icon: FiCompass, key: "task" },
   // { name: "Favourites", icon: FiStar },
   // { name: "Settings", icon: FiSettings },
 ];
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
   const { t } = useTranslation();
+  const { pathname } = useLocation();
   return (
     <Box
-      transition="3s ease"
+      transition="tranlateX 3s ease"
       bg={useColorModeValue("white", "gray.900")}
       borderRight="1px"
       borderRightColor={useColorModeValue("gray.200", "gray.700")}
@@ -49,7 +52,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon}>
+        <NavItem key={link.name} icon={link.icon} to={`/${link.key}`} isActive={`/${link.key}` === pathname}>
           {t(`sidebar.${link.name}`)}
         </NavItem>
       ))}
