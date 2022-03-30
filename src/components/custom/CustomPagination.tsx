@@ -24,8 +24,6 @@ export function CustomPagination({
   let left = Math.max(1, currentPage - pageBufferSize);
   let right = Math.min(currentPage + pageBufferSize, totalPage);
 
-  console.log(`totalPage ${totalPage} - total ${total} - pageSize ${pageSize}`);
-
   if (totalPage > pageBufferSize * 2) {
     if (currentPage - 1 <= pageBufferSize) {
       right = 1 + pageBufferSize * 2;

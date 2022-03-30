@@ -1,0 +1,77 @@
+.custom-table {
+  th,
+  tr {
+    white-space: nowrap;
+  }
+  .custom-table__header--sticky {
+    tr {
+      z-index: 5;
+      position: sticky !important;
+      top: 0;
+      &:after {
+        content: "";
+        position: absolute;
+        background-color: gray;
+        bottom: 0;
+        left: 0;
+        height: 1px;
+        width: 100%;
+      }
+    }
+  }
+}
+
+.custom-table--dark {
+  th,
+  td {
+    background-color: var(--chakra-colors-gray-900);
+  }
+}
+.custom-table--light {
+  th,
+  td {
+    background-color: white;
+  }
+}
+
+.custom-table--stick-last-column {
+  th:last-child,
+  td:last-child {
+    z-index: 0;
+    width: 200px;
+    right: 0px;
+    padding: 16px;
+    position: sticky;
+    &:before {
+      content: "";
+      position: absolute;
+      background-color: gray;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 1px;
+    }
+  }
+}
+
+@for $i from 1 through 20 {
+  .custom-table--stick-first-column-#{$i} {
+    th:nth-child(#{$i}),
+    td:nth-child(#{$i}) {
+      z-index: 0;
+      width: 200px;
+      left: 0px;
+      padding: 16px;
+      position: sticky;
+      &:after {
+        content: "";
+        position: absolute;
+        background-color: gray;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 1px;
+      }
+    }
+  }
+}
