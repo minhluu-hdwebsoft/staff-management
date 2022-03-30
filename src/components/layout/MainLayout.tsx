@@ -9,7 +9,7 @@ interface MainLayoutProps {
 export const MainLayout = (props: MainLayoutProps) => {
   return (
     <SidebarWithHeader>
-      <Box p={8}>{props.children}</Box>
+      <Box>{props.children}</Box>
     </SidebarWithHeader>
   );
 };
