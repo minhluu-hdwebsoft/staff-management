@@ -5,3 +5,9 @@ export interface FilterParams<T> {
   queryParams?: T;
   order?: string;
 }
+
+export enum FormType {
+  EDIT,
+  CREATE,
+  VIEW,
+}

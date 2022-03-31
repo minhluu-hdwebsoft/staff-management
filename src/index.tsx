@@ -1,23 +1,24 @@
+import { ChakraProvider } from "@chakra-ui/react";
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./App";
-import reportWebVitals from "./reportWebVitals";
-import { ChakraProvider } from "@chakra-ui/react";
-import { theme } from "./theme";
-import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "./modules/Auth/context";
-import "./utils/i18n.ts";
 import { Provider } from "react-redux";
+import App from "./App";
 import { store } from "./app/store";
+import { CustomRouter } from "./components/common/CustomRouter";
+import { AuthProvider } from "./modules/Auth/context";
+import reportWebVitals from "./reportWebVitals";
+import { theme } from "./theme";
+import history from "./utils/history";
+import "./utils/i18n.ts";
 
 ReactDOM.render(
   <Provider store={store}>
     <ChakraProvider theme={theme}>
-      <BrowserRouter>
+      <CustomRouter history={history}>
         <AuthProvider>
           <App />
         </AuthProvider>
-      </BrowserRouter>
+      </CustomRouter>
     </ChakraProvider>
   </Provider>,
   document.getElementById("root"),

@@ -15,11 +15,11 @@ export const FloatFormControl = (props: FloatFormControlProps) => {
   const { helperText, label, errorMessage, children, isInvaild, id, ...rest } = props;
 
   return (
-    <FormControl variant="floating" id={id} {...rest} isInvalid={Boolean(errorMessage) || isInvaild}>
+    <FormControl id={id} {...rest} isInvalid={Boolean(errorMessage) || isInvaild}>
       {/* <Input type={type} name={name} placeholder={placeholder || " "} value={value} defaultValue={defaultValue || ""} /> */}
       {/* It is important that the Label comes after the Control due to css selectors */}
+      {label && <FormLabel>{label || "Label"}</FormLabel>}
       {children}
-      <FormLabel>{label || "Label"}</FormLabel>
       {helperText && <FormHelperText>{helperText}</FormHelperText>}
       {errorMessage && <FormErrorMessage>{errorMessage}</FormErrorMessage>}
     </FormControl>

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useToast } from "@chakra-ui/react";
 import { UserRegisterParams } from "@hdwebsoft/intranet-api-sdk/libs/api/auth/models";
 import { User } from "@hdwebsoft/intranet-api-sdk/libs/api/user/models";
 import React, { ReactElement, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api";
 import { LoadingPage } from "../../components/common/LoadingPage";
+import toast from "../../utils/toast";
 
 interface AuthContextType {
   currentUser: User | undefined;
@@ -19,7 +19,6 @@ interface AuthContextType {
 const AuthContext = React.createContext<AuthContextType>(null!);
 
 export const AuthProvider = ({ children }: { children: ReactElement }) => {
-  const toast = useToast();
   const navigate = useNavigate();
   const [isLoadingUser, setIsLoadingUser] = useState(false);
   const currentUser = useRef<User>();
@@ -59,18 +58,12 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
         title: "Sign in Success",
         description: "Welcome to Staff Management System",
         status: "success",
-        duration: 2000,
-        isClosable: true,
-        position: "top",
       });
     } catch (error: any) {
       toast({
         title: "Sign in Failture",
         description: error.message ? error.message : "Unknow error",
         status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top",
       });
     } finally {
       Promise.resolve;

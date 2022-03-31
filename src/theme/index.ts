@@ -4,6 +4,18 @@ const activeLabelStyles = {
   transform: "scale(0.85) translateY(-24px)",
 };
 export const theme = extendTheme({
+  semanticTokens: {
+    colors: {
+      primary: {
+        default: "blue.500",
+        _dark: "blue.400",
+      },
+      secondary: {
+        default: "teal.800",
+        _dark: "teal.700",
+      },
+    },
+  },
   components: {
     Form: {
       variants: {

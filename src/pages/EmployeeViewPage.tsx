@@ -1,15 +1,15 @@
 import { VStack } from "@chakra-ui/react";
 import React from "react";
 import { CustomBreadcrumb } from "../components/custom";
-import EmployeeList from "../modules/Employee/List/EmployeeList";
+import EmployeeViewForm from "../modules/Employee/Form/EmployeeView";
 
-function EmployeeListPage() {
+function EmployeeViewPage() {
   return (
     <VStack spacing={5} justifyContent="stretch" alignItems={"stretch"}>
       <CustomBreadcrumb />
-      <EmployeeList />
+      <EmployeeViewForm />
     </VStack>
   );
 }
 
-export default EmployeeListPage;
+export default EmployeeViewPage;
