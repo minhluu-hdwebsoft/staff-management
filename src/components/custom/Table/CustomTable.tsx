@@ -11,7 +11,6 @@ import {
   Tr,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { prependOnceListener } from "process";
 import React, { ReactElement, useState } from "react";
 import "./style.scss";
 
@@ -64,7 +63,7 @@ export default function CustomTable({
   console.log(sort);
 
   return (
-    <Box __css={{ overflow: "auto", height: tableHeight }}>
+    <Box className={"custom-table-container"} __css={{ overflow: "auto", height: tableHeight }}>
       <Table
         className={`custom-table custom-table--stick-first-column-${stickColIndex} custom-table--${useColorModeValue(
           "light",

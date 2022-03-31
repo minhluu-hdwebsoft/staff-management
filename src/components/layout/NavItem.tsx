@@ -21,13 +21,13 @@ const NavItem = ({ to, icon, children, isActive = false, ...rest }: NavItemProps
         role="group"
         cursor="pointer"
         _hover={{
-          bg: "cyan.400",
+          bg: "blue.400",
           color: "white",
         }}
         __css={
           isActive
             ? {
-                bg: "cyan.400",
+                bg: "blue.400",
                 color: "white",
               }
             : {

@@ -3,6 +3,7 @@
   "sidebar": {
     "dashboard": "Dashboard",
     "task": "Task",
-    "employee": "Employee"
+    "employee": "Employee",
+    "create": "Create new employee"
   }
 }

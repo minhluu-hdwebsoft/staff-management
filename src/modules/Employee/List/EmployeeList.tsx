@@ -1,7 +1,9 @@
-import { Stack, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Stack, useToast, VStack } from "@chakra-ui/react";
 import { EmployeeQueryParams } from "@hdwebsoft/intranet-api-sdk/libs/api/hr/models";
 import queryString from "query-string";
 import React, { useEffect, useMemo, useState } from "react";
+import { FiPlusSquare } from "react-icons/fi";
+import { CgExport, CgImport } from "react-icons/cg";
 import { shallowEqual } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
@@ -15,6 +17,7 @@ import { selectEmployeeListId, selectIsFetchingEmployee, selectTotalEmployee } f
 import { employeeActions } from "../slice";
 import EmployeeListItem from "./EmployeeListItem";
 import EmployeeFilter from "./Filter/EmployeeFilter";
+import api from "../../../api";
 
 const tableHeader: CustomTableHeaderProps[] = [
   {
@@ -73,13 +76,13 @@ const tableHeader: CustomTableHeaderProps[] = [
 const EmployeeList = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const { search } = useLocation();
 
   const [filter, setFilter] = useState<FilterParams<EmployeeQueryParams>>({
     page: 1,
     limit: 10,
-    // q: 'is_deleted=true&search=1'
     order: "",
     ...queryString.parse(search),
   });
@@ -128,9 +131,34 @@ const EmployeeList = () => {
     }));
   };
 
+  const handleDeleteEmployeeOnClick = async (id: string) => {
+    try {
+      await api.hr.employee.delete(id);
+      toast({
+        title: "Delete employee",
+        status: "error",
+      });
+      setFilter((prev) => ({ ...prev }));
+    } catch (error) {
+      toast({
+        title: "Sign in Success",
+        description: "Welcome to Staff Management System",
+      });
+    }
+  };
+
   return (
     <Stack spacing={5}>
-      <EmployeeFilter onChange={handleFilterOnChange} />
+      <Box display={"flex"} justifyContent={"space-between"}>
+        <EmployeeFilter onChange={handleFilterOnChange} />
+        <HStack>
+          <Button leftIcon={<FiPlusSquare />} colorScheme="blue" onClick={() => navigate("/employee/create")}>
+            Create
+          </Button>
+          <Button leftIcon={<CgImport />}>Import</Button>
+          <Button leftIcon={<CgExport />}>Export</Button>
+        </HStack>
+      </Box>
       <CustomLoading isLoading={isFetching}>
         <VStack spacing={5} display="block">
           <CustomTable
@@ -143,7 +171,7 @@ const EmployeeList = () => {
             onChange={handleTableOnChange}
           >
             {employeeList.map((item) => (
-              <EmployeeListItem key={item} id={item} />
+              <EmployeeListItem key={item} id={item} onDelete={handleDeleteEmployeeOnClick} />
             ))}
           </CustomTable>
 
