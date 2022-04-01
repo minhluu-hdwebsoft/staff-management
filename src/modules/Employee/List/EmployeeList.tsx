@@ -1,9 +1,9 @@
-import { Box, Button, HStack, Stack, useToast, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Stack, Text, VStack } from "@chakra-ui/react";
 import { EmployeeQueryParams } from "@hdwebsoft/intranet-api-sdk/libs/api/hr/models";
 import queryString from "query-string";
 import React, { useEffect, useMemo, useState } from "react";
-import { FiPlusSquare } from "react-icons/fi";
 import { CgExport, CgImport } from "react-icons/cg";
+import { FiRefreshCw, FiTrash2, FiUserPlus } from "react-icons/fi";
 import { shallowEqual } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
@@ -12,12 +12,18 @@ import CustomTable, {
   CustomTableHeaderProps,
   CustomTableSortProps,
 } from "../../../components/custom/Table/CustomTable";
+import { useModal } from "../../../hooks";
 import { FilterParams } from "../../../models";
-import { selectEmployeeListId, selectIsFetchingEmployee, selectTotalEmployee } from "../selector";
+import BulkDeleteEmployeeModal from "../Modal/BulkDeleteEmployeeModal";
+import {
+  selectEmployeeListId,
+  selectIsFetchingEmployee,
+  selectSelectedEmployeeIds,
+  selectTotalEmployee,
+} from "../selector";
 import { employeeActions } from "../slice";
 import EmployeeListItem from "./EmployeeListItem";
 import EmployeeFilter from "./Filter/EmployeeFilter";
-import api from "../../../api";
 
 const tableHeader: CustomTableHeaderProps[] = [
   {
@@ -74,9 +80,9 @@ const tableHeader: CustomTableHeaderProps[] = [
 ];
 
 const EmployeeList = () => {
+  const { open, close } = useModal();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const toast = useToast();
 
   const { search } = useLocation();
 
@@ -86,6 +92,7 @@ const EmployeeList = () => {
     order: "",
     ...queryString.parse(search),
   });
+
   const defaultSortValue = useMemo(() => {
     const tmpOrderArr = filter.order?.split("-") || [];
     const sortValue: CustomTableSortProps = {
@@ -98,12 +105,13 @@ const EmployeeList = () => {
   const employeeList = useAppSelector(selectEmployeeListId, shallowEqual);
   const totalItem = useAppSelector(selectTotalEmployee);
   const isFetching = useAppSelector(selectIsFetchingEmployee);
+  const selectedEmployeeIds = useAppSelector(selectSelectedEmployeeIds);
 
   useEffect(() => {
     navigate({
       search: queryString.stringify(filter),
     });
-    dispatch(employeeActions.getList(filter));
+    dispatch(employeeActions.fetchList(filter));
   }, [filter]);
 
   const handlePaginationChange = ({ page, limit }: { page: number; limit: number }) => {
@@ -131,20 +139,31 @@ const EmployeeList = () => {
     }));
   };
 
-  const handleDeleteEmployeeOnClick = async (id: string) => {
-    try {
-      await api.hr.employee.delete(id);
-      toast({
-        title: "Delete employee",
-        status: "error",
-      });
-      setFilter((prev) => ({ ...prev }));
-    } catch (error) {
-      toast({
-        title: "Sign in Success",
-        description: "Welcome to Staff Management System",
-      });
+  const handleDeleteEmployeeOnClick = (id: string) => {
+    dispatch(employeeActions.delete(id));
+  };
+
+  const handleEmployeeOnCheck = (id: string, isChecked: boolean) => {
+    if (isChecked) {
+      dispatch(employeeActions.addSelectEmployee(id));
+    } else {
+      dispatch(employeeActions.removeSelectEmployee(id));
     }
+  };
+
+  const handleBulkDeleteOnClick = () => {
+    open({
+      title: "Confirmation to delete selected employees",
+      content: (
+        <BulkDeleteEmployeeModal
+          onOk={() => {
+            dispatch(employeeActions.bulkDelete());
+          }}
+          onCancel={close}
+        />
+      ),
+      footer: null,
+    });
   };
 
   return (
@@ -152,13 +171,32 @@ const EmployeeList = () => {
       <Box display={"flex"} justifyContent={"space-between"}>
         <EmployeeFilter onChange={handleFilterOnChange} />
         <HStack>
-          <Button leftIcon={<FiPlusSquare />} colorScheme="blue" onClick={() => navigate("/employee/create")}>
+          <Button leftIcon={<FiUserPlus />} colorScheme="blue" onClick={() => navigate("/employee/create")}>
             Create
           </Button>
           <Button leftIcon={<CgImport />}>Import</Button>
           <Button leftIcon={<CgExport />}>Export</Button>
         </HStack>
       </Box>
+      <HStack spacing={5} h={18}>
+        {selectedEmployeeIds.length > 0 && (
+          <HStack spacing={3}>
+            <Button size={"sm"} leftIcon={<FiTrash2 />} colorScheme={"red"} onClick={handleBulkDeleteOnClick}>
+              Delete all
+            </Button>
+            <Button
+              size={"sm"}
+              leftIcon={<FiRefreshCw />}
+              onClick={() => dispatch(employeeActions.cleanAllSelectEmployee())}
+            >
+              Clear all
+            </Button>
+          </HStack>
+        )}
+        <Text>{`Total employee: ${totalItem}${
+          selectedEmployeeIds.length ? `- Selected ${selectedEmployeeIds.length} item` : ""
+        }`}</Text>
+      </HStack>
       <CustomLoading isLoading={isFetching}>
         <VStack spacing={5} display="block">
           <CustomTable
@@ -171,7 +209,12 @@ const EmployeeList = () => {
             onChange={handleTableOnChange}
           >
             {employeeList.map((item) => (
-              <EmployeeListItem key={item} id={item} onDelete={handleDeleteEmployeeOnClick} />
+              <EmployeeListItem
+                key={item}
+                id={item}
+                onDelete={handleDeleteEmployeeOnClick}
+                onCheck={handleEmployeeOnCheck}
+              />
             ))}
           </CustomTable>
 

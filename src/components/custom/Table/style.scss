@@ -13,20 +13,24 @@
   tr {
     white-space: nowrap;
   }
+  th,
+  td {
+    border-width: 1px;
+  }
   .custom-table__header--sticky {
     tr {
       z-index: 5;
       position: sticky !important;
       top: 0;
-      // &:after {
-      //   content: "";
-      //   position: absolute;
-      //   background-color: gray;
-      //   bottom: 0;
-      //   left: 0;
-      //   height: 1px;
-      //   width: 100%;
-      // }
+      &:after {
+        content: "";
+        position: absolute;
+        background-color: gray;
+        bottom: 0;
+        left: 0;
+        height: 1px;
+        width: 100%;
+      }
     }
   }
 }
@@ -52,15 +56,15 @@
     right: 0px;
     padding: 16px;
     position: sticky;
-    // &:before {
-    //   content: "";
-    //   position: absolute;
-    //   background-color: gray;
-    //   top: 0;
-    //   left: 0;
-    //   height: 100%;
-    //   width: 1px;
-    // }
+    &:before {
+      content: "";
+      position: absolute;
+      background-color: gray;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 1px;
+    }
   }
 }
 
@@ -73,15 +77,15 @@
       left: 0px;
       padding: 16px;
       position: sticky;
-      // &:after {
-      //   content: "";
-      //   position: absolute;
-      //   background-color: gray;
-      //   top: 0;
-      //   right: 0;
-      //   height: 100%;
-      //   width: 1px;
-      // }
+      &:after {
+        content: "";
+        position: absolute;
+        background-color: gray;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 1px;
+      }
     }
   }
 }

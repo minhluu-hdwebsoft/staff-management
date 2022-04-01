@@ -5,6 +5,7 @@ import { Provider } from "react-redux";
 import App from "./App";
 import { store } from "./app/store";
 import { CustomRouter } from "./components/common/CustomRouter";
+import { ModalCustomProvider } from "./hooks/useModal";
 import { AuthProvider } from "./modules/Auth/context";
 import reportWebVitals from "./reportWebVitals";
 import { theme } from "./theme";
@@ -16,7 +17,9 @@ ReactDOM.render(
     <ChakraProvider theme={theme}>
       <CustomRouter history={history}>
         <AuthProvider>
-          <App />
+          <ModalCustomProvider>
+            <App />
+          </ModalCustomProvider>
         </AuthProvider>
       </CustomRouter>
     </ChakraProvider>

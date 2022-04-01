@@ -17,7 +17,7 @@ import "./style.scss";
 export interface CustomTableHeaderProps extends TableColumnHeaderProps {
   isSort?: boolean;
   key: string;
-  name?: string;
+  name?: string | ReactElement;
 }
 
 export interface CustomTableSortProps {
@@ -59,8 +59,6 @@ export default function CustomTable({
     onChange && onChange(newSortValue);
     setSort(newSortValue);
   };
-
-  console.log(sort);
 
   return (
     <Box className={"custom-table-container"} __css={{ overflow: "auto", height: tableHeight }}>

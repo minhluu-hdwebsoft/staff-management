@@ -11,3 +11,10 @@ export enum FormType {
   CREATE,
   VIEW,
 }
+
+export enum ActionStatus {
+  IDLE,
+  PENDING,
+  SUCCESS,
+  FAILTURE,
+}
