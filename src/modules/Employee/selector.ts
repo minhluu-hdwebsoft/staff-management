@@ -16,5 +16,6 @@ export const selectedEmployee = (state: RootState) => state.employee.selectedEmp
 export const selectSelectedEmployeeIds = (state: RootState) => state.employee.selectedEmployeeIds;
 export const selectIsEmployeeSelected = (state: RootState, employeeId: string) =>
   Boolean(state.employee.selectedEmployeeIds.find((item) => item === employeeId));
+
 export const selectedEmployeeDeletingStatus = (state: RootState, employeeId: string) =>
   state.employee.deletingEmployee[employeeId]?.status;

@@ -8,7 +8,7 @@ export const PasswordInput = (props: InputProps & { inputRegister?: UseFormRegis
 
   return (
     <InputGroup>
-      <Input type={show ? "text" : "password"} {...props} {...props.inputRegister} placeholder=" " />
+      <Input type={show ? "text" : "password"} {...props} {...props.inputRegister} />
       <InputRightElement width="4.5rem" height={"38px"}>
         <Button h="1.75rem" size="sm" onClick={handleClick}>
           {show ? "Hide" : "Show"}

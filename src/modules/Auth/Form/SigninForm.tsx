@@ -3,7 +3,7 @@ import React from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link as ReactLink } from "react-router-dom";
 import { FloatFormControl, PasswordInput } from "../../../components/custom";
-import { useAuth } from "../context";
+import { useLogin } from "../hooks";
 
 interface SigninType {
   email: string;
@@ -11,7 +11,7 @@ interface SigninType {
 }
 
 export default function SigninForm(): JSX.Element {
-  const { signIn } = useAuth();
+  const { isLoading, login } = useLogin();
 
   const {
     handleSubmit,
@@ -19,26 +19,26 @@ export default function SigninForm(): JSX.Element {
     formState: { errors, isSubmitting },
   } = useForm<SigninType>();
 
-  const onSubmit: SubmitHandler<SigninType> = async (values) => {
-    await signIn(values.email, values.password);
+  const onSubmit: SubmitHandler<SigninType> = (values) => {
+    login(values.email, values.password);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={5}>
         <FloatFormControl label="Email" id="email" errorMessage={errors.email?.message}>
-          <Input placeholder=" " {...register("email", { required: "This is required" })} />
+          <Input placeholder="Please enter email..." {...register("email", { required: "This is required" })} />
         </FloatFormControl>
         <FloatFormControl label="Password" id="password" errorMessage={errors.password?.message}>
           <PasswordInput
-            placeholder=" "
+            placeholder="Please enter password..."
             inputRegister={{ ...register("password", { required: "This is required" }) }}
           />
         </FloatFormControl>
         <Stack spacing={10} pt={2}>
           <Button
             type="submit"
-            isLoading={isSubmitting}
+            isLoading={isSubmitting || isLoading}
             loadingText="Submitting"
             size="lg"
             bg={"blue.400"}

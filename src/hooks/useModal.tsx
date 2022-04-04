@@ -44,20 +44,16 @@ export const ModalCustomContext = createContext<ModalCustomType>({
   },
 });
 
-// const defautlModalProps: ModalProps = {};
-
 export const ModalCustomProvider = (props: ModalProviderProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [modalConfig, setModalConfig] = useState<ModalProps>({});
 
   const open = (config: ModalProps) => {
-    console.log("Open modal");
     setModalConfig(config);
     onOpen();
   };
 
   const close = () => {
-    console.log("close modal");
     onClose();
   };
 
@@ -82,7 +78,9 @@ export const ModalCustomProvider = (props: ModalProviderProps) => {
               )}
         </ModalContent>
       </Modal>
-      {React.useMemo(() => props.children, [])}
+      {/* {ReactDOM.createPortal(<div>1234</div>, document.getElementById)} */}
+      {/* {React.useMemo(() => props.children, [])} */}
+      {props.children}
     </ModalCustomContext.Provider>
   );
 };

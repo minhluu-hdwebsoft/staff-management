@@ -17,19 +17,17 @@ import {
 import { MaritalStatus } from "@hdwebsoft/intranet-api-sdk/libs/api/hr/employee/models";
 import { Gender } from "@hdwebsoft/intranet-api-sdk/libs/type";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useEmployeeIdentity } from "modules/Employee/hooks";
 import moment from "moment";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { FiRefreshCw, FiUpload } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
-import api from "../../../../api";
-import { useAppSelector } from "../../../../app/hooks";
-import { CustomFileUpload, FloatFormControl } from "../../../../components/custom";
-import { FormType } from "../../../../models";
-import { validateFiles } from "../../../../utils/upload";
-import { appRegExp } from "../../../../utils/validate";
-import { selectIsCreatingEmployee } from "../../selector";
+import { CustomFileUpload, FloatFormControl } from "components/custom";
+import { FormType } from "models";
+import { validateFiles } from "utils/upload";
+import { appRegExp } from "utils/validate";
 
 export interface FormData {
   file_: FileList;
@@ -77,13 +75,14 @@ const schema = yup
 interface EmployeeFormProps {
   type?: FormType;
   defaultValue?: FormDataOptional;
+  isLoading?: boolean;
   onSubmit?: (data: FormData) => void;
 }
 
-export default function EmployeeForm({ type = FormType.CREATE, defaultValue, onSubmit }: EmployeeFormProps) {
-  const [genaratingCode, setGenaratingCode] = useState<boolean>(false);
+export default function EmployeeForm({ type = FormType.CREATE, defaultValue, onSubmit, isLoading }: EmployeeFormProps) {
   const navigate = useNavigate();
-  const isCreating = useAppSelector(selectIsCreatingEmployee);
+  const { genarating, code, getCode } = useEmployeeIdentity(defaultValue?.code || "");
+
   const {
     register,
     handleSubmit,
@@ -111,18 +110,15 @@ export default function EmployeeForm({ type = FormType.CREATE, defaultValue, onS
 
   useEffect(() => {
     if (type === FormType.CREATE) {
-      handleGenerateEmployeeCodeClick();
+      getCode();
     }
   }, []);
 
-  const onFormSubmit: SubmitHandler<FormData> = (data) => onSubmit && onSubmit(data);
-
-  const handleGenerateEmployeeCodeClick = async () => {
-    setGenaratingCode(true);
-    const code = await api.hr.employee.identity();
+  useEffect(() => {
     setValue("code", code);
-    setGenaratingCode(false);
-  };
+  }, [code]);
+
+  const onFormSubmit: SubmitHandler<FormData> = (data) => onSubmit && onSubmit(data);
 
   return (
     <form about="create-employee-form" onSubmit={handleSubmit(onFormSubmit)}>
@@ -148,11 +144,11 @@ export default function EmployeeForm({ type = FormType.CREATE, defaultValue, onS
                   <IconButton
                     isDisabled={type !== FormType.CREATE}
                     size={"sm"}
-                    isLoading={genaratingCode}
+                    isLoading={genarating}
                     aria-label="Refresh code"
                     icon={<FiRefreshCw />}
                     colorScheme={"blue"}
-                    onClick={handleGenerateEmployeeCodeClick}
+                    onClick={getCode}
                   />
                 </InputRightElement>
               </InputGroup>
@@ -254,7 +250,7 @@ export default function EmployeeForm({ type = FormType.CREATE, defaultValue, onS
           ) : (
             <>
               <Button onClick={() => navigate("/employee")}>Cancel</Button>
-              <Button type="submit" isLoading={isCreating} colorScheme={"blue"}>
+              <Button type="submit" loadingText="Submiting" isLoading={isLoading || false} colorScheme={"blue"}>
                 Submit
               </Button>
             </>

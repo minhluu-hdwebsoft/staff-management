@@ -1,25 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  CreateEmployeeParam,
-  Employee,
-  EmployeeQueryParams,
-  UpdateEmployeeParam,
-} from "@hdwebsoft/intranet-api-sdk/libs/api/hr/models";
+import { CreateEmployeeParam, Employee, UpdateEmployeeParam } from "@hdwebsoft/intranet-api-sdk/libs/api/hr/models";
 import { UploadFile } from "@hdwebsoft/intranet-api-sdk/libs/api/upload/models";
 import { Pagination } from "@hdwebsoft/intranet-api-sdk/libs/type";
 import { PayloadAction } from "@reduxjs/toolkit";
 import queryString from "query-string";
-import { all, call, put, select, takeEvery, takeLatest, takeLeading } from "redux-saga/effects";
+import { call, fork, put, select, takeEvery, takeLatest, takeLeading } from "redux-saga/effects";
 import api from "../../api";
 import { RootState } from "../../app/store";
-import { ActionStatus, FilterParams } from "../../models";
+import { ActionStatus } from "../../models";
 import history from "../../utils/history";
 import toast from "../../utils/toast";
 import { selectSelectedEmployeeIds } from "./selector";
 import { employeeActions } from "./slice";
+import { EmployeeFilterParams } from "./types";
 
 // ASYNC
-async function fetchEmployeeList(filter: FilterParams<EmployeeQueryParams>) {
+async function fetchEmployeeList(filter: EmployeeFilterParams) {
   try {
     const { q, queryParams, order, page, limit } = filter;
     return await api.hr.employee.list(q, queryParams, order, page, limit);
@@ -80,7 +76,7 @@ async function uploadImage(file: File) {
 }
 
 // WORKER
-function* workerFetchList(action: PayloadAction<FilterParams<EmployeeQueryParams>>) {
+function* workerFetchList(action: PayloadAction<EmployeeFilterParams>) {
   try {
     const response: Pagination<Employee> = yield call(
       fetchEmployeeList,
@@ -139,8 +135,8 @@ function* workerCreate(action: PayloadAction<{ avatar: undefined | File; data: C
   }
 }
 
-function* workerDelete(action: PayloadAction<string>) {
-  const employeeId = action.payload;
+function* workerDelete(action: PayloadAction<{ id: string; filter: EmployeeFilterParams }>) {
+  const { filter, id: employeeId } = action.payload;
 
   try {
     yield call(deleteEmployee, employeeId);
@@ -152,7 +148,7 @@ function* workerDelete(action: PayloadAction<string>) {
     );
 
     if (isEmptyDeletingEmployee) {
-      yield put(employeeActions.fetchList());
+      yield put(employeeActions.fetchList(filter));
       toast({
         title: "Delete employee success",
         status: "success",
@@ -168,13 +164,13 @@ function* workerDelete(action: PayloadAction<string>) {
   }
 }
 
-function* workerBulkDelete() {
+function* workerBulkDelete(action: PayloadAction<EmployeeFilterParams>) {
   try {
     const employeeIds: string[] = yield select(selectSelectedEmployeeIds);
     yield call(bulkDeleteEmployee, employeeIds);
     yield put(employeeActions.bulkDeleteSuccess());
 
-    yield put(employeeActions.fetchList());
+    yield put(employeeActions.fetchList(action.payload));
     toast({
       title: "Delete employee success",
       status: "success",
@@ -228,5 +224,5 @@ function* watcher() {
 
 export default function* employeeSaga() {
   console.log("Run Employee Saga !");
-  yield all([watcher()]);
+  yield fork(watcher);
 }

@@ -4,11 +4,8 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Link as ReactLink } from "react-router-dom";
 import { FloatFormControl, PasswordInput } from "../../../components/custom";
-import { useAuth } from "../context";
 
 export default function SignupForm() {
-  const { register: userRegister } = useAuth();
-
   const {
     handleSubmit,
     register,
@@ -16,7 +13,8 @@ export default function SignupForm() {
   } = useForm<UserRegisterParams>();
 
   const onSubmit = async (values: UserRegisterParams) => {
-    await userRegister(values);
+    // await userRegister(values);
+    console.log(values);
   };
 
   return (

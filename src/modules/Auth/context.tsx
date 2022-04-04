@@ -1,121 +1,76 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { UserRegisterParams } from "@hdwebsoft/intranet-api-sdk/libs/api/auth/models";
-import { User } from "@hdwebsoft/intranet-api-sdk/libs/api/user/models";
-import React, { ReactElement, useContext, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../../api";
-import { LoadingPage } from "../../components/common/LoadingPage";
-import toast from "../../utils/toast";
+import React, { createContext, ReactElement, useContext, useEffect, useRef, useState } from "react";
+import { AuthProvider, defaultAuthProvider } from "./authProvider";
+import { UserIdentity } from "./types";
 
-interface AuthContextType {
-  currentUser: User | undefined;
+interface AuthContextValues {
+  isLoading: boolean;
+  error: Error | unknown;
+  identity: UserIdentity | null;
+  authProvider: AuthProvider;
   isAuthenticated: boolean;
-  signIn: (username: string, password: string) => Promise<void>;
-  signOut: () => void;
-  register: (values: UserRegisterParams) => Promise<void>;
+  setAuthState: (authenticated: boolean, identity?: UserIdentity | null) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const AuthContext = React.createContext<AuthContextType>(null!);
+const AuthContext = createContext<AuthContextValues>({
+  isLoading: false,
+  error: null,
+  identity: null,
+  authProvider: defaultAuthProvider,
+  isAuthenticated: false,
+  setAuthState: () => null,
+});
 
-export const AuthProvider = ({ children }: { children: ReactElement }) => {
-  const navigate = useNavigate();
-  const [isLoadingUser, setIsLoadingUser] = useState(false);
-  const currentUser = useRef<User>();
-  const isAuthenticated = useRef<boolean>(false);
+const useAuthContextProvider = (authProvider: AuthProvider): AuthContextValues => {
+  const [isLoading, setIsLoading] = useState(true);
+  const isAuthenticatedRef = useRef<boolean>(false);
+  const identityRef = useRef<UserIdentity | null>(null);
+  const [error, setError] = useState<unknown>(null);
+
+  const setAuthState = (authenticated: boolean, identity?: UserIdentity | null) => {
+    setIsLoading(true);
+    isAuthenticatedRef.current = authenticated;
+    if (identity) {
+      identityRef.current = identity;
+    }
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    async function getAuthenticate() {
+    (async () => {
       try {
-        if (await api.auth.getAuthToken()) {
-          await api.auth.refreshToken();
-        }
-        const [isAuth, user] = await Promise.all([api.auth.isAuthenticated(), api.user.me()]);
-        isAuthenticated.current = isAuth;
-        currentUser.current = user;
-      } catch (error) {
-        isAuthenticated.current = false;
+        setIsLoading(true);
+        await authProvider.refreshToken();
+        const identity = await authProvider.getIdentity();
+        identityRef.current = identity;
+        isAuthenticatedRef.current = Boolean(identity);
+      } catch (error: unknown) {
+        setError(error);
       } finally {
-        setIsLoadingUser(true);
+        setIsLoading(false);
       }
-    }
-    getAuthenticate();
+    })();
   }, []);
 
-  const signOut = async () => {
-    await api.auth.logout();
-    isAuthenticated.current = false;
-    navigate("/");
+  return {
+    isLoading,
+    isAuthenticated: isAuthenticatedRef.current,
+    error,
+    identity: identityRef.current,
+    setAuthState,
+    authProvider,
   };
-
-  const signIn = async (username: string, password: string) => {
-    try {
-      await api.auth.login(username, password);
-      isAuthenticated.current = true;
-      currentUser.current = await api.user.me();
-      navigate("/");
-      toast({
-        title: "Sign in Success",
-        description: "Welcome to Staff Management System",
-        status: "success",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Sign in Failture",
-        description: error.message ? error.message : "Unknow error",
-        status: "error",
-      });
-    } finally {
-      Promise.resolve;
-    }
-  };
-
-  const register = async (values: UserRegisterParams): Promise<void> => {
-    values.code = "7000";
-    try {
-      await api.auth.register(values);
-      toast({
-        title: "Sign up Success",
-        description: "Welcome to HDWEBSOFT",
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-        position: "top",
-      });
-      navigate("/sign-in");
-    } catch (error: any) {
-      toast({
-        title: "Sign up Failture",
-        description: error.message ? error.message : "Unknow error",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top",
-      });
-    } finally {
-      Promise.resolve();
-    }
-  };
-
-  if (!isLoadingUser) {
-    return <LoadingPage />;
-  }
-
-  return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated: isAuthenticated.current,
-        currentUser: currentUser.current,
-        signIn,
-        signOut,
-        register,
-      }}
-    >
-      {children}{" "}
-    </AuthContext.Provider>
-  );
 };
 
-export const useAuth = () => {
-  return useContext(AuthContext);
+export const AuthContextProvider = ({
+  authProvider,
+  children,
+}: {
+  authProvider: AuthProvider;
+  children: ReactElement | ReactElement[];
+}) => {
+  const contextValue = useAuthContextProvider(authProvider);
+
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
+
+export const useAuth = () => useContext(AuthContext) as AuthContextValues;

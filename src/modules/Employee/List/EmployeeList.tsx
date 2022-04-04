@@ -1,11 +1,10 @@
 import { Box, Button, HStack, Stack, Text, VStack } from "@chakra-ui/react";
-import { EmployeeQueryParams } from "@hdwebsoft/intranet-api-sdk/libs/api/hr/models";
-import queryString from "query-string";
+import { useQueryParams } from "hooks/useQueryParams";
 import React, { useEffect, useMemo, useState } from "react";
 import { CgExport, CgImport } from "react-icons/cg";
 import { FiRefreshCw, FiTrash2, FiUserPlus } from "react-icons/fi";
 import { shallowEqual } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { CustomLoading, CustomPagination } from "../../../components/custom";
 import CustomTable, {
@@ -13,7 +12,7 @@ import CustomTable, {
   CustomTableSortProps,
 } from "../../../components/custom/Table/CustomTable";
 import { useModal } from "../../../hooks";
-import { FilterParams } from "../../../models";
+import { useDelete } from "../hooks";
 import BulkDeleteEmployeeModal from "../Modal/BulkDeleteEmployeeModal";
 import {
   selectEmployeeListId,
@@ -22,6 +21,7 @@ import {
   selectTotalEmployee,
 } from "../selector";
 import { employeeActions } from "../slice";
+import { EmployeeFilterParams } from "../types";
 import EmployeeListItem from "./EmployeeListItem";
 import EmployeeFilter from "./Filter/EmployeeFilter";
 
@@ -53,14 +53,15 @@ const tableHeader: CustomTableHeaderProps[] = [
     isSort: true,
   },
   {
-    name: "Skill",
-    key: "skill1",
+    name: "Position",
+    key: "position",
     isSort: true,
   },
   {
-    name: "Skill",
-    key: "skill2",
+    name: "Allocable",
+    key: "allocable",
     isSort: true,
+    align: "center",
   },
   {
     name: "Skill",
@@ -75,7 +76,7 @@ const tableHeader: CustomTableHeaderProps[] = [
   {
     name: "",
     key: "action",
-    minWidth: 100,
+    maxWidth: 100,
   },
 ];
 
@@ -83,15 +84,21 @@ const EmployeeList = () => {
   const { open, close } = useModal();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { bulkDelete } = useDelete();
 
-  const { search } = useLocation();
+  const { query, updateParams } = useQueryParams<EmployeeFilterParams>();
 
-  const [filter, setFilter] = useState<FilterParams<EmployeeQueryParams>>({
-    page: 1,
-    limit: 10,
-    order: "",
-    ...queryString.parse(search),
+  const [filter, setFilter] = useState<EmployeeFilterParams>({
+    ...query,
+    page: query?.page || 1,
+    limit: query?.limit || 10,
+    order: query?.order || "",
   });
+
+  useEffect(() => {
+    updateParams(filter);
+    dispatch(employeeActions.fetchList(filter));
+  }, [filter]);
 
   const defaultSortValue = useMemo(() => {
     const tmpOrderArr = filter.order?.split("-") || [];
@@ -106,13 +113,6 @@ const EmployeeList = () => {
   const totalItem = useAppSelector(selectTotalEmployee);
   const isFetching = useAppSelector(selectIsFetchingEmployee);
   const selectedEmployeeIds = useAppSelector(selectSelectedEmployeeIds);
-
-  useEffect(() => {
-    navigate({
-      search: queryString.stringify(filter),
-    });
-    dispatch(employeeActions.fetchList(filter));
-  }, [filter]);
 
   const handlePaginationChange = ({ page, limit }: { page: number; limit: number }) => {
     setFilter((prev) => ({
@@ -139,10 +139,6 @@ const EmployeeList = () => {
     }));
   };
 
-  const handleDeleteEmployeeOnClick = (id: string) => {
-    dispatch(employeeActions.delete(id));
-  };
-
   const handleEmployeeOnCheck = (id: string, isChecked: boolean) => {
     if (isChecked) {
       dispatch(employeeActions.addSelectEmployee(id));
@@ -154,14 +150,7 @@ const EmployeeList = () => {
   const handleBulkDeleteOnClick = () => {
     open({
       title: "Confirmation to delete selected employees",
-      content: (
-        <BulkDeleteEmployeeModal
-          onOk={() => {
-            dispatch(employeeActions.bulkDelete());
-          }}
-          onCancel={close}
-        />
-      ),
+      content: <BulkDeleteEmployeeModal onOk={bulkDelete} onCancel={close} />,
       footer: null,
     });
   };
@@ -209,12 +198,7 @@ const EmployeeList = () => {
             onChange={handleTableOnChange}
           >
             {employeeList.map((item) => (
-              <EmployeeListItem
-                key={item}
-                id={item}
-                onDelete={handleDeleteEmployeeOnClick}
-                onCheck={handleEmployeeOnCheck}
-              />
+              <EmployeeListItem key={item} id={item} onCheck={handleEmployeeOnCheck} />
             ))}
           </CustomTable>
 

@@ -9,6 +9,7 @@ import { Pagination } from "@hdwebsoft/intranet-api-sdk/libs/type";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../app/store";
 import { ActionStatus, FilterParams } from "../../models";
+import { CreatePayload, DeletePayload, EmployeeFilterParams, UpdatePayload } from "./types";
 
 interface EmployeeState {
   isFetching: boolean;
@@ -47,7 +48,8 @@ const employeeSlice = createSlice({
   name: "employee",
   initialState,
   reducers: {
-    fetchList: (state: EmployeeState, action: PayloadAction<FilterParams<EmployeeQueryParams> | undefined>) => {
+    // FETCH LIST
+    fetchList: (state: EmployeeState, action: PayloadAction<EmployeeFilterParams>) => {
       state.isFetching = true;
       state.deletingEmployee = {};
       state.bulkDeleteStatus = ActionStatus.IDLE;
@@ -60,6 +62,8 @@ const employeeSlice = createSlice({
       state.isFetching = false;
       state.errorMessage = action.payload;
     },
+
+    // FETCH BY ID
     fetchEmployeeById: (state: EmployeeState, action: PayloadAction<string>) => {
       state.isFetching = true;
     },
@@ -67,7 +71,9 @@ const employeeSlice = createSlice({
       state.isFetching = false;
       state.selectedEmployee = action.payload;
     },
-    create: (state: EmployeeState, action: PayloadAction<{ avatar: undefined | File; data: CreateEmployeeParam }>) => {
+
+    // CREATE
+    create: (state: EmployeeState, action: PayloadAction<CreatePayload>) => {
       state.isCreating = true;
     },
     createSuccess: (state: EmployeeState) => {
@@ -77,18 +83,22 @@ const employeeSlice = createSlice({
       state.isCreating = false;
       state.errorMessage = action.payload;
     },
-    update: (state: EmployeeState, action: PayloadAction<{ avatar: undefined | File; data: UpdateEmployeeParam }>) => {
-      state.isCreating = true;
+
+    // UPDATE
+    update: (state: EmployeeState, action: PayloadAction<UpdatePayload>) => {
+      state.isEditing = true;
     },
     updateSuccess: (state: EmployeeState) => {
-      state.isCreating = false;
+      state.isEditing = false;
     },
     updatefailture: (state: EmployeeState, action: PayloadAction<string>) => {
-      state.isCreating = false;
+      state.isEditing = false;
       state.errorMessage = action.payload;
     },
-    delete: (state: EmployeeState, action: PayloadAction<string>) => {
-      state.deletingEmployee[action.payload] = {
+
+    // DELETE
+    delete: (state: EmployeeState, action: PayloadAction<DeletePayload>) => {
+      state.deletingEmployee[action.payload.id] = {
         status: ActionStatus.PENDING,
       };
     },
@@ -98,6 +108,8 @@ const employeeSlice = createSlice({
     deleteFailture: (state: EmployeeState, action: PayloadAction<string>) => {
       state.deletingEmployee[action.payload].status = ActionStatus.FAILTURE;
     },
+
+    // SELECT EMPLOYEE
     addSelectEmployee: (state: EmployeeState, action: PayloadAction<string>) => {
       state.selectedEmployeeIds.push(action.payload);
     },
@@ -107,7 +119,9 @@ const employeeSlice = createSlice({
     cleanAllSelectEmployee: (state: EmployeeState) => {
       state.selectedEmployeeIds = [];
     },
-    bulkDelete: (state: EmployeeState) => {
+
+    // BULK DELETE
+    bulkDelete: (state: EmployeeState, action: PayloadAction<EmployeeFilterParams>) => {
       state.bulkDeleteStatus = ActionStatus.PENDING;
       state.deletingEmployee = state.selectedEmployeeIds.reduce(
         (result, item) => ({ ...result, [item]: { status: ActionStatus.PENDING } }),

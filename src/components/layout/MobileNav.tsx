@@ -14,9 +14,10 @@ import {
   useColorModeValue,
   VStack,
 } from "@chakra-ui/react";
+import { useLogout } from "modules/Auth/hooks";
 import React from "react";
 import { FiChevronDown, FiMenu } from "react-icons/fi";
-import { useAuth } from "../../modules/Auth/context";
+import { useAuth } from "../../modules/Auth/Context";
 import ColorSwitchButton from "./ColorSwitchButton";
 import LanguageMenu from "./LanguageMenu";
 
@@ -25,10 +26,10 @@ interface MobileProps extends FlexProps {
 }
 
 const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
-  const { signOut, currentUser } = useAuth();
-
+  const { identity } = useAuth();
+  const logout = useLogout();
   const handleSignoutClick = () => {
-    signOut();
+    logout();
   };
 
   return (
@@ -62,10 +63,10 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
           <Menu>
             <MenuButton py={2} transition="all 0.3s" _focus={{ boxShadow: "none" }}>
               <HStack>
-                <Avatar size={"sm"} src={currentUser?.avatar} />
+                <Avatar size={"sm"} src={identity?.avatar} />
                 <VStack display={{ base: "none", md: "flex" }} alignItems="flex-start" spacing="1px" ml="2">
-                  <Text fontSize="sm">{currentUser?.display_name || currentUser?.username}</Text>
-                  <Text fontSize="xs">{currentUser?.email}</Text>
+                  <Text fontSize="sm">{identity?.display_name || identity?.username}</Text>
+                  <Text fontSize="xs">{identity?.email}</Text>
                 </VStack>
                 <Box display={{ base: "none", md: "flex" }}>
                   <FiChevronDown />

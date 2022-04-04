@@ -17,15 +17,15 @@ import {
 import React from "react";
 import { FiCheck, FiEdit2, FiEye, FiMoreVertical, FiTrash2, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { useAppSelector } from "../../../app/hooks";
-import { useModal } from "../../../hooks";
-import { ActionStatus } from "../../../models";
+import { useAppSelector } from "app/hooks";
+import { useModal } from "hooks";
+import { ActionStatus } from "models";
 import DeleteEmployeeModal from "../Modal/DeleteEmployeeModal";
-import { selectedEmployeeDeletingStatus, selectEmployeeById, selectIsEmployeeSelected } from "../selector";
+import { selectEmployeeById, selectIsEmployeeSelected } from "../selector";
+import { useDelete } from "../hooks";
 
 interface EmployeeListItemProps {
   id: string;
-  onDelete?: (id: string) => void;
   onCheck?: (id: string, isChecked: boolean) => void;
 }
 
@@ -60,13 +60,15 @@ const renderIconButton = (deleteStatus: ActionStatus) => {
   );
 };
 
-export default function EmployeeListItem({ id, onDelete, onCheck }: EmployeeListItemProps) {
+export default function EmployeeListItem({ id, onCheck }: EmployeeListItemProps) {
   const { open, close } = useModal();
+  const { deleteEmployee, deleteStatus } = useDelete(id);
 
   const employee = useAppSelector((state) => selectEmployeeById(state, id));
-  const deleteStatus = useAppSelector((state) => selectedEmployeeDeletingStatus(state, id));
   const isSelected = useAppSelector((state) => selectIsEmployeeSelected(state, id));
+
   const navigate = useNavigate();
+
   if (!employee) return null;
 
   const displayName = `${employee.first_name} ${employee.last_name}`;
@@ -74,15 +76,7 @@ export default function EmployeeListItem({ id, onDelete, onCheck }: EmployeeList
   const handleOnpenDeleteModal = () => {
     open({
       title: `Remove ${displayName}`,
-      content: (
-        <DeleteEmployeeModal
-          employee={employee}
-          onOk={() => {
-            onDelete && onDelete(id);
-          }}
-          onCancel={close}
-        />
-      ),
+      content: <DeleteEmployeeModal employee={employee} onOk={deleteEmployee} onCancel={close} />,
       footer: null,
       size: "xl",
     });
@@ -109,9 +103,13 @@ export default function EmployeeListItem({ id, onDelete, onCheck }: EmployeeList
       <Td isNumeric>{employee.code}</Td>
       <Td>{employee.email}</Td>
       <Td>{employee.phone}</Td>
-      <Td>Skill</Td>
-      <Td>Skill</Td>
-      <Td>Skill</Td>
+      <Td>{employee.job_title}</Td>
+      <Td>
+        <Center>
+          <Checkbox size="lg" colorScheme="blue" isChecked={employee.allocable} />
+        </Center>
+      </Td>
+      <Td>{employee.tags}</Td>
       <Td>Skill</Td>
       <Td>
         <Center>
@@ -149,6 +147,7 @@ export default function EmployeeListItem({ id, onDelete, onCheck }: EmployeeList
                         colorScheme={"red"}
                         icon={<FiTrash2 />}
                         onClick={handleOnpenDeleteModal}
+                        // onClick={() => onDelete && onDelete(id)}
                       />
                     </Tooltip>
                   </PopoverHeader>

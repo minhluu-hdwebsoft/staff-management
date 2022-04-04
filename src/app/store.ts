@@ -9,7 +9,10 @@ export const store = configureStore({
   reducer: {
     employee: employeeReducer,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(saga),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      thunk: true,
+    }).concat(saga),
 });
 
 saga.run(employeeSaga);

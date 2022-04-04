@@ -10,9 +10,9 @@ export default function SignupPage() {
           <Heading fontSize={"4xl"} textAlign={"center"}>
             Sign up
           </Heading>
-          <Text fontSize={"lg"} color={"gray.600"}>
+          {/* <Text fontSize={"lg"} color={"gray.600"}>
             ❤️❤️❤️ from Minh with love ✌️❤️❤️
-          </Text>
+          </Text> */}
         </Stack>
         <Box
           minW={"450px"}
