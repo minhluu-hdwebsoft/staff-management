@@ -17,7 +17,7 @@ function EmployeeEditForm() {
 
     const { firstName, lastName, file_, gender, dateOfBirth, joined, nickname, phoneNumber, personalEmail, status } =
       data;
-    const avatarFile = file_.item(0);
+    const avatarFile = file_?.item(0);
 
     update({
       avatar: avatarFile || undefined,

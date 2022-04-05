@@ -1,8 +1,9 @@
-import { Button, Input, Link, Stack, Text } from "@chakra-ui/react";
+import { Button, Link, Stack, Text } from "@chakra-ui/react";
+import { Form, Input, PasswordInput } from "components/custom/Form";
 import React from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { SubmitHandler } from "react-hook-form";
 import { Link as ReactLink } from "react-router-dom";
-import { FloatFormControl, PasswordInput } from "../../../components/custom";
+import yup from "utils/yupGlobal";
 import { useLogin } from "../hooks";
 
 interface SigninType {
@@ -10,35 +11,27 @@ interface SigninType {
   password: string;
 }
 
+const validateSchema = yup.object({
+  email: yup.string().required("Required").email("Email invalid"),
+  password: yup.string().password().required("Required"),
+});
+
 export default function SigninForm(): JSX.Element {
   const { isLoading, login } = useLogin();
-
-  const {
-    handleSubmit,
-    register,
-    formState: { errors, isSubmitting },
-  } = useForm<SigninType>();
 
   const onSubmit: SubmitHandler<SigninType> = (values) => {
     login(values.email, values.password);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <Form onSubmit={onSubmit} schema={validateSchema}>
       <Stack spacing={5}>
-        <FloatFormControl label="Email" id="email" errorMessage={errors.email?.message}>
-          <Input placeholder="Please enter email..." {...register("email", { required: "This is required" })} />
-        </FloatFormControl>
-        <FloatFormControl label="Password" id="password" errorMessage={errors.password?.message}>
-          <PasswordInput
-            placeholder="Please enter password..."
-            inputRegister={{ ...register("password", { required: "This is required" }) }}
-          />
-        </FloatFormControl>
+        <Input name="email" label="Email" inputProps={{ placeholder: "Please enter email..." }} />
+        <PasswordInput name="password" label="Password" inputProps={{ placeholder: "Please enter password..." }} />
         <Stack spacing={10} pt={2}>
           <Button
             type="submit"
-            isLoading={isSubmitting || isLoading}
+            isLoading={isLoading}
             loadingText="Submitting"
             size="lg"
             bg={"blue.400"}
@@ -59,6 +52,6 @@ export default function SigninForm(): JSX.Element {
           </Text>
         </Stack>
       </Stack>
-    </form>
+    </Form>
   );
 }

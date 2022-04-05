@@ -33,6 +33,7 @@ export function CustomFileUpload(props: CustomFileUploadProps) {
           ref(e);
           inputRef.current = e;
         }}
+        onChange={(e) => console.log(e.target.files)}
       />
       <>{children}</>
     </InputGroup>

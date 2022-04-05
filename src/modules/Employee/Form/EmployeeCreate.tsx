@@ -9,6 +9,7 @@ function EmployeeCreateForm() {
   const { isCreating, create } = useCreate();
 
   const handleFormSubmit = (data: FormData) => {
+    console.log("🚀 Minh =====>  ~ file: EmployeeCreate.tsx ~ line 12 ~ data", data);
     const {
       firstName,
       lastName,

@@ -13,6 +13,7 @@ import reportWebVitals from "./reportWebVitals";
 import { theme } from "./theme";
 import history from "./utils/history";
 import "./utils/i18n.ts";
+import "./utils/yupGlobal";
 
 ReactDOM.render(
   <Provider store={store}>

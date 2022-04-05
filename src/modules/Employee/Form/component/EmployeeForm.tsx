@@ -5,11 +5,8 @@ import {
   GridItem,
   HStack,
   IconButton,
-  Input,
   InputGroup,
   InputRightElement,
-  Radio,
-  RadioGroup,
   Stack,
   useColorModeValue,
   VStack,
@@ -17,17 +14,15 @@ import {
 import { MaritalStatus } from "@hdwebsoft/intranet-api-sdk/libs/api/hr/employee/models";
 import { Gender } from "@hdwebsoft/intranet-api-sdk/libs/type";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Form, Input, RadioInput, UploadImageInput } from "components/custom/Form";
+import { FormType } from "models";
 import { useEmployeeIdentity } from "modules/Employee/hooks";
 import moment from "moment";
-import React, { useEffect, useMemo } from "react";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import React, { useEffect } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
 import { FiRefreshCw, FiUpload } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import * as yup from "yup";
-import { CustomFileUpload, FloatFormControl } from "components/custom";
-import { FormType } from "models";
-import { validateFiles } from "utils/upload";
-import { appRegExp } from "utils/validate";
 
 export interface FormData {
   file_: FileList;
@@ -66,7 +61,7 @@ const schema = yup
     firstName: yup.string().required(),
     lastName: yup.string().required(),
     dateOfBirth: yup.date().max(moment().subtract(16, "y"), "Only allow 16+ years old!").required(),
-    phoneNumber: yup.string().required().matches(appRegExp.phone, "Phone number is not valid"),
+    phoneNumber: yup.string().required().phone("Phone is valid"),
     email: yup.string().email().required(),
     personalEmail: yup.string().email().required(),
   })
@@ -83,15 +78,7 @@ export default function EmployeeForm({ type = FormType.CREATE, defaultValue, onS
   const navigate = useNavigate();
   const { genarating, code, getCode } = useEmployeeIdentity(defaultValue?.code || "");
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    control,
-    setValue,
-    getValues,
-    formState: { errors },
-  } = useForm<FormData>({
+  const methods = useForm<FormData>({
     defaultValues: {
       ...defaultValue,
       gender: Gender.MALE,
@@ -101,27 +88,22 @@ export default function EmployeeForm({ type = FormType.CREATE, defaultValue, onS
     resolver: yupResolver(schema),
   });
 
-  const newAvatarUrl = useMemo(() => {
-    if (watch("file_") && watch("file_")?.[0]) {
-      return URL.createObjectURL(watch("file_")?.[0] as File);
-    }
-    return getValues().avatarUrl;
-  }, [watch("file_")?.[0]]);
-
   useEffect(() => {
     if (type === FormType.CREATE) {
       getCode();
     }
   }, []);
 
+  console.log(methods.formState.errors);
+
   useEffect(() => {
-    setValue("code", code);
+    methods.setValue("code", code);
   }, [code]);
 
   const onFormSubmit: SubmitHandler<FormData> = (data) => onSubmit && onSubmit(data);
 
   return (
-    <form about="create-employee-form" onSubmit={handleSubmit(onFormSubmit)}>
+    <Form onSubmit={onFormSubmit} formMethods={methods}>
       <VStack w={"full"} spacing={5} justifyContent={"space-between"} alignItems={"stretch"}>
         <Grid
           minHeight={450}
@@ -130,16 +112,28 @@ export default function EmployeeForm({ type = FormType.CREATE, defaultValue, onS
           gap={4}
         >
           <GridItem rowSpan={{ base: 1, md: 5 }} colSpan={{ base: 8, md: 2 }}>
-            <VStack spacing={5} borderRadius={5} p={5} bgColor={useColorModeValue("gray.300", "whiteAlpha.300")}>
-              <Avatar size={"2xl"} name="Upload" src={newAvatarUrl} />
-              <CustomFileUpload accept={"image/*"} register={register("file_", { validate: validateFiles })}>
-                <Button leftIcon={<FiUpload />}> Upload </Button>
-              </CustomFileUpload>
-            </VStack>
-
+            <UploadImageInput name="file_" accept="image/*">
+              {({ openFileChoice, fileUrl }) => (
+                <VStack
+                  w="full"
+                  spacing={5}
+                  borderRadius={5}
+                  p={5}
+                  bgColor={useColorModeValue("gray.300", "whiteAlpha.300")}
+                >
+                  <Avatar size={"2xl"} name="Upload" src={fileUrl || methods.getValues().avatarUrl} />
+                  <Button onClick={openFileChoice} leftIcon={<FiUpload />}>
+                    Upload
+                  </Button>
+                </VStack>
+              )}
+            </UploadImageInput>
             <HStack spacing={5} mt={10}>
               <InputGroup size="md">
-                <Input placeholder="Enter employee code..." textAlign={"center"} {...register("code")} isReadOnly />
+                <Input
+                  name="code"
+                  inputProps={{ isReadOnly: true, placeholder: "Enter employee code...", textAlign: "center" }}
+                />
                 <InputRightElement>
                   <IconButton
                     isDisabled={type !== FormType.CREATE}
@@ -155,91 +149,94 @@ export default function EmployeeForm({ type = FormType.CREATE, defaultValue, onS
             </HStack>
           </GridItem>
           <GridItem colSpan={{ base: 8, md: 3 }}>
-            <FloatFormControl label="First name" errorMessage={errors.firstName?.message}>
-              <Input placeholder="First name..." {...register("firstName")} isReadOnly={type === FormType.VIEW} />
-            </FloatFormControl>
+            <Input
+              label="First name"
+              name="firstName"
+              inputProps={{ isReadOnly: type === FormType.VIEW, placeholder: "First name..." }}
+            />
           </GridItem>
           <GridItem colSpan={{ base: 8, md: 3 }}>
-            <FloatFormControl label="Last name" errorMessage={errors.lastName?.message}>
-              <Input placeholder="Last name..." {...register("lastName")} isReadOnly={type === FormType.VIEW} />
-            </FloatFormControl>
+            <Input
+              label="Last name"
+              name="lastName"
+              inputProps={{ isReadOnly: type === FormType.VIEW, placeholder: "Last name..." }}
+            />
           </GridItem>
           <GridItem colSpan={{ base: 8, md: 3 }}>
-            <FloatFormControl label="Date of birth" errorMessage={errors.dateOfBirth?.message}>
-              <Input placeholder=" " type={"date"} {...register("dateOfBirth")} isReadOnly={type === FormType.VIEW} />
-            </FloatFormControl>
+            <Input
+              label="Date of birth"
+              name="dateOfBirth"
+              inputProps={{ isReadOnly: type === FormType.VIEW, type: "date" }}
+            />
           </GridItem>
           <GridItem colSpan={{ base: 8, md: 3 }}>
-            <FloatFormControl label="Gender" errorMessage={errors.gender?.message}>
-              <Controller
-                render={({ field: { onChange, value } }) => (
-                  <RadioGroup
-                    defaultValue={Gender.MALE}
-                    value={value}
-                    onChange={onChange}
-                    isDisabled={type === FormType.VIEW}
-                  >
-                    <Stack direction="row" spacing={10}>
-                      <Radio value={Gender.MALE}>Male</Radio>
-                      <Radio value={Gender.FEMALE}>Female</Radio>
-                      <Radio value={Gender.OTHER}>Other</Radio>
-                    </Stack>
-                  </RadioGroup>
-                )}
-                name="gender"
-                control={control}
-              />
-            </FloatFormControl>
+            <RadioInput
+              label="Gender"
+              name="gender"
+              inputProps={{ isDisabled: type === FormType.VIEW }}
+              data={[
+                {
+                  value: Gender.MALE,
+                  title: "Male",
+                },
+                {
+                  value: Gender.FEMALE,
+                  title: "Female",
+                },
+                {
+                  value: Gender.OTHER,
+                  title: "Other",
+                },
+              ]}
+            />
           </GridItem>
           <GridItem colSpan={{ base: 8, md: 3 }}>
-            <FloatFormControl label="Email" errorMessage={errors.email?.message}>
-              <Input placeholder="Email..." {...register("email")} isReadOnly={type !== FormType.CREATE} />
-            </FloatFormControl>
+            <Input
+              label="Email"
+              name="email"
+              inputProps={{ isReadOnly: type !== FormType.CREATE, placeholder: "Email..." }}
+            />
           </GridItem>
           <GridItem colSpan={{ base: 8, md: 3 }}>
-            <FloatFormControl label="Phone number" errorMessage={errors.phoneNumber?.message}>
-              <Input placeholder="Phone..." {...register("phoneNumber")} isReadOnly={type === FormType.VIEW} />
-            </FloatFormControl>
+            <Input
+              label="Phone number"
+              name="phoneNumber"
+              inputProps={{ isReadOnly: type === FormType.VIEW, placeholder: "Phone..." }}
+            />
           </GridItem>
           <GridItem colSpan={{ base: 8, md: 3 }}>
-            <FloatFormControl label="Status" errorMessage={errors.status?.message}>
-              <Controller
-                render={({ field: { onChange, value } }) => (
-                  <RadioGroup
-                    defaultValue={MaritalStatus.SINGLE}
-                    value={value}
-                    onChange={onChange}
-                    isDisabled={type === FormType.VIEW}
-                  >
-                    <Stack direction="row" spacing={10}>
-                      <Radio value={MaritalStatus.SINGLE}>Single</Radio>
-                      <Radio value={MaritalStatus.MARRIED}>Married</Radio>
-                    </Stack>
-                  </RadioGroup>
-                )}
-                name="status"
-                control={control}
-              />
-            </FloatFormControl>
+            <RadioInput
+              label="Status"
+              name="status"
+              inputProps={{ isDisabled: type === FormType.VIEW }}
+              data={[
+                {
+                  value: MaritalStatus.SINGLE,
+                  title: "Single",
+                },
+                {
+                  value: MaritalStatus.MARRIED,
+                  title: "Married",
+                },
+              ]}
+            />
           </GridItem>
           <GridItem colSpan={{ base: 8, md: 3 }}>
-            <FloatFormControl label="Nickname" errorMessage={errors.nickname?.message}>
-              <Input placeholder="Nickname..." {...register("nickname")} isReadOnly={type === FormType.VIEW} />
-            </FloatFormControl>
+            <Input
+              label="Nickname"
+              name="nickname"
+              inputProps={{ isReadOnly: type === FormType.VIEW, placeholder: "Nickname..." }}
+            />
           </GridItem>
           <GridItem colSpan={{ base: 8, md: 3 }}>
-            <FloatFormControl label="Joined" errorMessage={errors.joined?.message}>
-              <Input placeholder=" " type={"date"} {...register("joined")} isReadOnly={type === FormType.VIEW} />
-            </FloatFormControl>
+            <Input label="Joined" name="joined" inputProps={{ isReadOnly: type === FormType.VIEW, type: "date" }} />
           </GridItem>
           <GridItem colSpan={{ base: 8, md: 3 }}>
-            <FloatFormControl label="Personal email" errorMessage={errors.personalEmail?.message}>
-              <Input
-                placeholder="Personal email..."
-                {...register("personalEmail")}
-                isReadOnly={type === FormType.VIEW}
-              />
-            </FloatFormControl>
+            <Input
+              label="Personal email"
+              name="personalEmail"
+              inputProps={{ isReadOnly: type === FormType.VIEW, placeholder: "Personal email..." }}
+            />
           </GridItem>
         </Grid>
         <Stack direction={"row"} spacing={5} justifyContent={"end"}>
@@ -257,6 +254,6 @@ export default function EmployeeForm({ type = FormType.CREATE, defaultValue, onS
           )}
         </Stack>
       </VStack>
-    </form>
+    </Form>
   );
 }

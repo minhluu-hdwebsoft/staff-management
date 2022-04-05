@@ -1,57 +1,36 @@
-import { Box, Button, HStack, Input, Link, Stack, Text } from "@chakra-ui/react";
+import { Box, Button, HStack, Link, Stack, Text } from "@chakra-ui/react";
 import { UserRegisterParams } from "@hdwebsoft/intranet-api-sdk/libs/api/auth/models";
+import { Form, Input, PasswordInput } from "components/custom/Form";
 import React from "react";
-import { useForm } from "react-hook-form";
 import { Link as ReactLink } from "react-router-dom";
-import { FloatFormControl, PasswordInput } from "../../../components/custom";
 
 export default function SignupForm() {
-  const {
-    handleSubmit,
-    register,
-    formState: { errors, isSubmitting },
-  } = useForm<UserRegisterParams>();
-
   const onSubmit = async (values: UserRegisterParams) => {
-    // await userRegister(values);
     console.log(values);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <Form onSubmit={onSubmit}>
       <Stack spacing={5}>
         <HStack>
           <Box>
-            <FloatFormControl label="First Name" id="first_name" errorMessage={errors.first_name?.message}>
-              <Input placeholder=" " {...register("first_name", { required: "This is required" })} />
-            </FloatFormControl>
+            <Input label="First Name" name="first_name" inputProps={{ placeholder: "Please enter first name..." }} />
           </Box>
           <Box>
-            <FloatFormControl label="Last Name" id="last_name" errorMessage={errors.last_name?.message}>
-              <Input placeholder=" " {...register("last_name", { required: "This is required" })} />
-            </FloatFormControl>
+            <Input label="Last Name" name="last_name" inputProps={{ placeholder: "Please enter last name..." }} />
           </Box>
         </HStack>
-        <FloatFormControl label="Email" id="email" errorMessage={errors.email?.message}>
-          <Input placeholder=" " {...register("email", { required: "This is required" })} />
-        </FloatFormControl>
-        <FloatFormControl label="Username" id="username" errorMessage={errors.username?.message}>
-          <Input placeholder=" " {...register("username", { required: "This is required" })} />
-        </FloatFormControl>
-        <FloatFormControl
-          label="Password"
-          id="password1"
-          helperText="How to make a strong password ?"
-          errorMessage={errors.password1?.message}
-        >
-          <PasswordInput inputRegister={{ ...register("password1", { required: "This is required" }) }} />
-        </FloatFormControl>
-        <FloatFormControl label="Confirm password" id="password2" errorMessage={errors.password2?.message}>
-          <PasswordInput inputRegister={{ ...register("password2", { required: "This is required" }) }} />
-        </FloatFormControl>
+        <Input label="Email" name="email" inputProps={{ placeholder: "Please enter email..." }} />
+        <Input label="Username" name="username" inputProps={{ placeholder: "Please enter username..." }} />
+        <PasswordInput label="Password" name="password1" inputProps={{ placeholder: "Please enter password..." }} />
+        <PasswordInput
+          label="Confirm password"
+          name="password2"
+          inputProps={{ placeholder: "Please enter password..." }}
+        />
+
         <Stack spacing={10} pt={2}>
           <Button
-            isLoading={isSubmitting}
             type="submit"
             loadingText="Submitting"
             size="lg"
@@ -73,6 +52,6 @@ export default function SignupForm() {
           </Text>
         </Stack>
       </Stack>
-    </form>
+    </Form>
   );
 }

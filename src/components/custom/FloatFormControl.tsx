@@ -3,7 +3,7 @@ import React, { ReactElement } from "react";
 
 interface FloatFormControlProps {
   id?: string;
-  children?: ReactElement;
+  children?: ReactElement | ReactElement[];
   helperText?: string;
   label?: string;
   errorMessage?: string;
@@ -16,8 +16,6 @@ export const FloatFormControl = (props: FloatFormControlProps) => {
 
   return (
     <FormControl id={id} {...rest} isInvalid={Boolean(errorMessage) || isInvaild}>
-      {/* <Input type={type} name={name} placeholder={placeholder || " "} value={value} defaultValue={defaultValue || ""} /> */}
-      {/* It is important that the Label comes after the Control due to css selectors */}
       {label && <FormLabel>{label || "Label"}</FormLabel>}
       {children}
       {helperText && <FormHelperText>{helperText}</FormHelperText>}
