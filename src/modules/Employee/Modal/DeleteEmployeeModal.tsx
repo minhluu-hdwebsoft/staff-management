@@ -1,10 +1,9 @@
 import { Box, Button, Input, Text, Tooltip, useClipboard, VStack } from "@chakra-ui/react";
 import { Employee } from "@hdwebsoft/intranet-api-sdk/libs/api/hr/models";
 import React, { useEffect, useState } from "react";
-import { useAppSelector } from "../../../app/hooks";
 import { FloatFormControl } from "../../../components/custom";
 import { ActionStatus } from "../../../models";
-import { selectedEmployeeDeletingStatus } from "../selector";
+import { useDelete } from "../hooks";
 
 function DeleteEmployeeModal({
   employee,
@@ -17,7 +16,7 @@ function DeleteEmployeeModal({
 }) {
   const [inputValue, setInputValue] = useState<string>("");
   const { hasCopied, onCopy } = useClipboard(employee.email);
-  const deleteStatus = useAppSelector((state) => selectedEmployeeDeletingStatus(state, employee.id));
+  const { deleteStatus } = useDelete(employee.id);
 
   useEffect(() => {
     if (deleteStatus === ActionStatus.SUCCESS) {

@@ -1,5 +1,5 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import React, { ReactElement, useMemo } from "react";
+import React, { ReactElement } from "react";
 import { DeepPartial, FormProvider, SubmitHandler, UnpackNestedValue, useForm, UseFormReturn } from "react-hook-form";
 import * as yup from "yup";
 
@@ -12,14 +12,8 @@ interface FormProps<T> {
 }
 
 export function Form<T>({ children, defaultValues, onSubmit = () => null, schema, formMethods }: FormProps<T>) {
-  const methods = useMemo(() => {
-    if (formMethods) {
-      return formMethods;
-    }
-
-    const resolver = schema ? yupResolver(schema) : undefined;
-    return useForm<T>({ defaultValues, resolver });
-  }, [formMethods]);
+  const resolver = schema ? yupResolver(schema) : undefined;
+  const methods = formMethods || useForm<T>({ defaultValues, resolver });
 
   const { handleSubmit } = methods;
 

@@ -1,9 +1,7 @@
 import { Box, Button, HStack, Stack, Text, VStack } from "@chakra-ui/react";
-import { useQueryParams } from "hooks/useQueryParams";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { CgExport, CgImport } from "react-icons/cg";
 import { FiRefreshCw, FiTrash2, FiUserPlus } from "react-icons/fi";
-import { shallowEqual } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { CustomLoading, CustomPagination } from "../../../components/custom";
@@ -12,16 +10,10 @@ import CustomTable, {
   CustomTableSortProps,
 } from "../../../components/custom/Table/CustomTable";
 import { useModal } from "../../../hooks";
-import { useDelete } from "../hooks";
+import { useDelete, useFetchAllEmployee } from "../hooks";
 import BulkDeleteEmployeeModal from "../Modal/BulkDeleteEmployeeModal";
-import {
-  selectEmployeeListId,
-  selectIsFetchingEmployee,
-  selectSelectedEmployeeIds,
-  selectTotalEmployee,
-} from "../selector";
+import { selectSelectedEmployeeIds } from "../selector";
 import { employeeActions } from "../slice";
-import { EmployeeFilterParams } from "../types";
 import EmployeeListItem from "./EmployeeListItem";
 import EmployeeFilter from "./Filter/EmployeeFilter";
 
@@ -86,19 +78,7 @@ const EmployeeList = () => {
   const navigate = useNavigate();
   const { bulkDelete } = useDelete();
 
-  const { query, updateParams } = useQueryParams<EmployeeFilterParams>();
-
-  const [filter, setFilter] = useState<EmployeeFilterParams>({
-    ...query,
-    page: query?.page || 1,
-    limit: query?.limit || 10,
-    order: query?.order || "",
-  });
-
-  useEffect(() => {
-    updateParams(filter);
-    dispatch(employeeActions.fetchList(filter));
-  }, [filter]);
+  const { employeeList, totalItem, isFetching, setFilter, filter } = useFetchAllEmployee();
 
   const defaultSortValue = useMemo(() => {
     const tmpOrderArr = filter.order?.split("-") || [];
@@ -109,9 +89,6 @@ const EmployeeList = () => {
     return sortValue;
   }, []);
 
-  const employeeList = useAppSelector(selectEmployeeListId, shallowEqual);
-  const totalItem = useAppSelector(selectTotalEmployee);
-  const isFetching = useAppSelector(selectIsFetchingEmployee);
   const selectedEmployeeIds = useAppSelector(selectSelectedEmployeeIds);
 
   const handlePaginationChange = ({ page, limit }: { page: number; limit: number }) => {
