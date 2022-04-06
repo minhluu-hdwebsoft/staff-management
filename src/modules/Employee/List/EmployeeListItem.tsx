@@ -14,15 +14,20 @@ import {
   Tooltip,
   Tr,
 } from "@chakra-ui/react";
-import React from "react";
-import { FiCheck, FiEdit2, FiEye, FiMoreVertical, FiTrash2, FiX } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { Employee } from "@hdwebsoft/intranet-api-sdk/libs/api/hr/models";
+import { Pagination } from "@hdwebsoft/intranet-api-sdk/libs/type";
 import { useAppSelector } from "app/hooks";
 import { useModal } from "hooks";
+import { useQueryParams } from "hooks/useQueryParams";
 import { ActionStatus } from "models";
-import DeleteEmployeeModal from "../Modal/DeleteEmployeeModal";
-import { selectEmployeeById, selectIsEmployeeSelected } from "../selector";
+import React from "react";
+import { FiCheck, FiEdit2, FiEye, FiMoreVertical, FiTrash2, FiX } from "react-icons/fi";
+import { useQueryClient } from "react-query";
+import { useNavigate } from "react-router-dom";
 import { useDelete } from "../hooks";
+import DeleteEmployeeModal from "../Modal/DeleteEmployeeModal";
+import { selectIsEmployeeSelected } from "../selector";
+import { EmployeeFilterParams } from "../types";
 
 interface EmployeeListItemProps {
   id: string;
@@ -64,7 +69,13 @@ export default function EmployeeListItem({ id, onCheck }: EmployeeListItemProps)
   const { open, close } = useModal();
   const { deleteEmployee, deleteStatus } = useDelete(id);
 
-  const employee = useAppSelector((state) => selectEmployeeById(state, id));
+  const queryClient = useQueryClient();
+
+  const employee = queryClient
+    .getQueryData<Pagination<Employee>>("employeeList", { active: true, exact: false })
+    ?.results.find((item) => item.id === id);
+
+  // const employee = useAppSelector((state) => selectEmployeeById(state, id));
   const isSelected = useAppSelector((state) => selectIsEmployeeSelected(state, id));
 
   const navigate = useNavigate();

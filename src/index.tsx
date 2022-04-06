@@ -3,31 +3,38 @@ import { AuthContextProvider } from "modules/Auth/Context";
 import authProvider from "modules/Auth/defaultAuthProvider";
 import React from "react";
 import ReactDOM from "react-dom";
+import { ReactQueryDevtools } from "react-query/devtools";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { Provider } from "react-redux";
 import App from "./App";
 import { store } from "./app/store";
 import { CustomRouter } from "./components/common/CustomRouter";
 import { ModalCustomProvider } from "./hooks/useModal";
-// import { AuthProvider } from "./modules/Auth/context2";
 import reportWebVitals from "./reportWebVitals";
 import { theme } from "./theme";
 import history from "./utils/history";
 import "./utils/i18n.ts";
 import "./utils/yupGlobal";
 
+// Create a client
+const queryClient = new QueryClient();
+
 ReactDOM.render(
   <Provider store={store}>
-    <ChakraProvider theme={theme}>
-      <CustomRouter history={history}>
-        {/* <AuthProvider> */}
-        <AuthContextProvider authProvider={authProvider}>
-          <ModalCustomProvider>
-            <App />
-          </ModalCustomProvider>
-        </AuthContextProvider>
-        {/* </AuthProvider> */}
-      </CustomRouter>
-    </ChakraProvider>
+    <QueryClientProvider client={queryClient}>
+      <ChakraProvider theme={theme}>
+        <CustomRouter history={history}>
+          {/* <AuthProvider> */}
+          <AuthContextProvider authProvider={authProvider}>
+            <ModalCustomProvider>
+              <App />
+            </ModalCustomProvider>
+          </AuthContextProvider>
+          {/* </AuthProvider> */}
+        </CustomRouter>
+      </ChakraProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   </Provider>,
   document.getElementById("root"),
 );

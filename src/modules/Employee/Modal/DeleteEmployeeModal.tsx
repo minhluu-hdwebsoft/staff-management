@@ -5,18 +5,10 @@ import { FloatFormControl } from "../../../components/custom";
 import { ActionStatus } from "../../../models";
 import { useDelete } from "../hooks";
 
-function DeleteEmployeeModal({
-  employee,
-  onCancel,
-  onOk,
-}: {
-  employee: Employee;
-  onOk: () => void;
-  onCancel: () => void;
-}) {
+function DeleteEmployeeModal({ employee, onCancel }: { employee: Employee; onOk: () => void; onCancel: () => void }) {
   const [inputValue, setInputValue] = useState<string>("");
   const { hasCopied, onCopy } = useClipboard(employee.email);
-  const { deleteStatus } = useDelete(employee.id);
+  const { deleteStatus, deleteEmployee } = useDelete(employee.id);
 
   useEffect(() => {
     if (deleteStatus === ActionStatus.SUCCESS) {
@@ -47,7 +39,7 @@ function DeleteEmployeeModal({
           isLoading={deleteStatus === ActionStatus.PENDING}
           isDisabled={inputValue !== employee.email}
           colorScheme="red"
-          onClick={onOk}
+          onClick={deleteEmployee}
         >
           Delete
         </Button>
