@@ -2,6 +2,7 @@ import { Button, Link, Stack, Text } from "@chakra-ui/react";
 import { Form, Input, PasswordInput } from "components/custom/Form";
 import React from "react";
 import { SubmitHandler } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Link as ReactLink } from "react-router-dom";
 import yup from "utils/yupGlobal";
 import { useLogin } from "../hooks";
@@ -18,6 +19,7 @@ const validateSchema = yup.object({
 
 export default function SigninForm(): JSX.Element {
   const { isLoading, login } = useLogin();
+  const { t } = useTranslation();
 
   const onSubmit: SubmitHandler<SigninType> = (values) => {
     login(values.email, values.password);
@@ -26,13 +28,17 @@ export default function SigninForm(): JSX.Element {
   return (
     <Form onSubmit={onSubmit} schema={validateSchema}>
       <Stack spacing={5}>
-        <Input name="email" label="Email" inputProps={{ placeholder: "Please enter email..." }} />
-        <PasswordInput name="password" label="Password" inputProps={{ placeholder: "Please enter password..." }} />
+        <Input name="email" label={t("Email")} inputProps={{ placeholder: t("Please enter", { field: t("Email") }) }} />
+        <PasswordInput
+          name="password"
+          label={t("Password")}
+          inputProps={{ placeholder: t("Please enter", { field: t("Password") }) }}
+        />
         <Stack spacing={10} pt={2}>
           <Button
             type="submit"
             isLoading={isLoading}
-            loadingText="Submitting"
+            loadingText={t("Submitting")}
             size="lg"
             bg={"blue.400"}
             color={"white"}
@@ -40,14 +46,14 @@ export default function SigninForm(): JSX.Element {
               bg: "blue.500",
             }}
           >
-            Sign In
+            {t("Sign In")}
           </Button>
         </Stack>
         <Stack pt={3}>
           <Text align={"center"}>
-            {"Don't have account?"}{" "}
+            {t("Don't have account?")}
             <Link as={ReactLink} to="/sign-up" color={"blue.400"}>
-              Sign up
+              {t("Sign up")}
             </Link>
           </Text>
         </Stack>
