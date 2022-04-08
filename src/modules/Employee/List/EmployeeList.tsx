@@ -1,8 +1,10 @@
 import { Box, Button, HStack, Stack, Text, VStack } from "@chakra-ui/react";
+import { Employee } from "@hdwebsoft/intranet-api-sdk/libs/api/hr/employee/models";
 import React, { useMemo } from "react";
 import { CgExport, CgImport } from "react-icons/cg";
 import { FiRefreshCw, FiTrash2, FiUserPlus } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import { Column } from "react-table";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { CustomLoading, CustomPagination } from "../../../components/custom";
 import CustomTable, {
@@ -17,57 +19,107 @@ import { employeeActions } from "../slice";
 import EmployeeListItem from "./EmployeeListItem";
 import EmployeeFilter from "./Filter/EmployeeFilter";
 
-const tableHeader: CustomTableHeaderProps[] = [
+// const tableHeader: CustomTableHeaderProps[] = [
+//   {
+//     name: "",
+//     key: "",
+//   },
+//   {
+//     name: "Name",
+//     key: "first_name",
+//     isSort: true,
+//     minWidth: 250,
+//   },
+//   {
+//     name: "Code",
+//     key: "code",
+//     isSort: true,
+//     isNumeric: true,
+//   },
+//   {
+//     name: "Email",
+//     key: "email",
+//     isSort: true,
+//   },
+//   {
+//     name: "Phone",
+//     key: "phone",
+//     isSort: true,
+//   },
+//   {
+//     name: "Position",
+//     key: "position",
+//     isSort: true,
+//   },
+//   {
+//     name: "Allocable",
+//     key: "allocable",
+//     isSort: true,
+//     align: "center",
+//   },
+//   {
+//     name: "Skill",
+//     key: "skill3",
+//     isSort: true,
+//   },
+//   {
+//     name: "Skill",
+//     key: "skill4",
+//     isSort: true,
+//   },
+//   {
+//     name: "",
+//     key: "action",
+//     maxWidth: 100,
+//   },
+// ];
+
+const tableHeader: Column<Employee>[] = [
   {
-    name: "",
-    key: "",
+    Header: "",
+    id: "1",
   },
   {
-    name: "Name",
-    key: "first_name",
-    isSort: true,
+    Header: "Name",
+    id: "first_name",
+    accessor: "first_name",
     minWidth: 250,
   },
   {
-    name: "Code",
-    key: "code",
-    isSort: true,
-    isNumeric: true,
+    Header: "Code",
+    id: "code",
+    accessor: "code",
   },
   {
-    name: "Email",
-    key: "email",
-    isSort: true,
+    Header: "Email",
+    id: "email",
+    accessor: "email",
   },
   {
-    name: "Phone",
-    key: "phone",
-    isSort: true,
+    Header: "Phone",
+    id: "phone",
+    accessor: "phone",
   },
   {
-    name: "Position",
-    key: "position",
-    isSort: true,
+    Header: "Position",
+    id: "position",
   },
   {
-    name: "Allocable",
-    key: "allocable",
-    isSort: true,
-    align: "center",
+    Header: "Allocable",
+    id: "allocable",
+    accessor: "allocable",
   },
   {
-    name: "Skill",
-    key: "skill3",
-    isSort: true,
+    Header: "Skill",
+    id: "skill3",
   },
   {
-    name: "Skill",
-    key: "skill4",
-    isSort: true,
+    Header: "Skill",
+    id: "skill4",
   },
   {
-    name: "",
-    key: "action",
+    Header: "",
+    id: "action",
     maxWidth: 100,
   },
 ];
@@ -78,7 +130,9 @@ const EmployeeList = () => {
   const navigate = useNavigate();
   const { bulkDelete } = useDelete();
 
-  const { employeeList, totalItem, isFetching, setFilter, filter } = useFetchAllEmployee();
+  const { employeeList: employeeListIds, totalItem, isFetching, setFilter, filter } = useFetchAllEmployee();
+
+  const employeeList = useAppSelector((state) => state.employee.employeeList.results);
 
   const defaultSortValue = useMemo(() => {
     const tmpOrderArr = filter.order?.split("-") || [];
@@ -107,7 +161,17 @@ const EmployeeList = () => {
     }));
   };
 
-  const handleTableOnChange = (sortValues: CustomTableSortProps) => {
+  const handleTableOnChange = (sortValues?: CustomTableSortProps) => {
+    if (!sortValues) {
+      setFilter((prev) => ({
+        ...prev,
+        page: 1,
+        order: undefined,
+      }));
+
+      return;
+    }
+
     const order = `${sortValues.order === "desc" ? "-" : ""}${sortValues.key}`;
     setFilter((prev) => ({
       ...prev,
@@ -171,17 +235,15 @@ const EmployeeList = () => {
             isStickyHeader
             isStickyLastCol
             stickColIndex={2}
+            data={employeeList}
             defaultSortValue={defaultSortValue}
             onChange={handleTableOnChange}
-          >
-            {employeeList.map((item) => (
-              <EmployeeListItem key={item} id={item} onCheck={handleEmployeeOnCheck} />
-            ))}
-          </CustomTable>
+            renderRow={({ data }) => <EmployeeListItem key={data.id} id={data.id} onCheck={handleEmployeeOnCheck} />}
+          />
 
           <CustomPagination
             currentPage={+filter.page}
-            total={+totalItem | 1}
+            total={+totalItem || 1}
             pageSize={+filter.limit}
             onChange={handlePaginationChange}
             pageBufferSize={2}

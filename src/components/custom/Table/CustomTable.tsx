@@ -1,18 +1,8 @@
-import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  chakra,
-  Table,
-  TableColumnHeaderProps,
-  Tbody,
-  Tfoot,
-  Th,
-  Thead,
-  Tr,
-  useColorModeValue,
-} from "@chakra-ui/react";
-import React, { ReactElement, useState } from "react";
+import { Box, Table, TableColumnHeaderProps, Tbody, Td, Tfoot, Tr, useColorModeValue } from "@chakra-ui/react";
+import React, { ReactElement, useEffect } from "react";
+import { Column, TableRowProps, useSortBy, useTable } from "react-table";
 import "./style.scss";
+import { TableHeader } from "./TableHeader";
 
 export interface CustomTableHeaderProps extends TableColumnHeaderProps {
   isSort?: boolean;
@@ -25,22 +15,24 @@ export interface CustomTableSortProps {
   order: "asc" | "desc";
 }
 
-export interface CustomTableProps {
+export interface CustomTableProps<T extends object> {
   tableHeight?: number | string;
   isStickyHeader?: boolean;
   stickColIndex?: number;
-  columns?: CustomTableHeaderProps[];
-  children?: ReactElement[];
+  columns: Column<T>[];
+  data: T[];
+  renderRow?: ({ data, rowProps }: { data: T; rowProps: TableRowProps }) => ReactElement[] | ReactElement;
   isStickyLastCol?: boolean;
   defaultSortValue?: CustomTableSortProps;
-  onChange?: (sortValues: CustomTableSortProps) => void;
+  onChange?: (sortValues?: CustomTableSortProps) => void;
 }
 
-export default function CustomTable({
+export default function CustomTable<T extends object>({
   tableHeight = "auto",
   columns = [],
   isStickyHeader = true,
-  children,
+  renderRow,
+  data,
   stickColIndex,
   isStickyLastCol,
   defaultSortValue = {
@@ -48,17 +40,46 @@ export default function CustomTable({
     order: "asc",
   },
   onChange,
-}: CustomTableProps) {
-  const [sort, setSort] = useState<CustomTableSortProps>(defaultSortValue);
+}: CustomTableProps<T>) {
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    state: { sortBy },
+  } = useTable<T>(
+    {
+      columns,
+      data: data || [],
+      manualSortBy: true,
+      initialState: {
+        sortBy: [
+          {
+            id: defaultSortValue.key,
+            desc: defaultSortValue.order === "desc",
+          },
+        ],
+      },
+    },
+    useSortBy,
+  );
 
-  const handleHeaderSortClick = (key: string) => {
+  const handleHeaderSortClick = (key: string, isDescending: boolean | undefined) => {
     const newSortValue: CustomTableSortProps = {
       key,
-      order: sort.order === "asc" ? "desc" : "asc",
+      order: isDescending ? "desc" : "asc",
     };
-    onChange && onChange(newSortValue);
-    setSort(newSortValue);
+    onChange && onChange(key ? newSortValue : undefined);
   };
+
+  useEffect(() => {
+    if (sortBy[0]) {
+      handleHeaderSortClick(sortBy[0].id, sortBy[0].desc);
+    } else {
+      handleHeaderSortClick("", true);
+    }
+  }, [sortBy]);
 
   return (
     <Box className={"custom-table-container"} __css={{ overflow: "auto", height: tableHeight }}>
@@ -67,33 +88,35 @@ export default function CustomTable({
           "light",
           "dark",
         )} ${isStickyLastCol && "custom-table--stick-last-column"}`}
+        {...getTableProps()}
       >
-        <Thead className={`custom-table__header--${isStickyHeader && "sticky"}`}>
-          <Tr>
-            {columns?.map(({ key, name, isSort, ...rest }) => {
-              return (
-                <Th key={key} {...rest} cursor={isSort ? "pointer" : "none"} onClick={() => handleHeaderSortClick(key)}>
-                  {name}
-                  {isSort && sort.key === key ? (
-                    sort.order === "asc" ? (
-                      <chakra.span pl="4">
-                        <TriangleDownIcon aria-label="sorted descending" />
-                      </chakra.span>
-                    ) : (
-                      <chakra.span pl="4">
-                        <TriangleUpIcon aria-label="sorted descending" />
-                      </chakra.span>
-                    )
-                  ) : null}
-                </Th>
-              );
-            })}
-          </Tr>
-        </Thead>
-        <Tbody>{children}</Tbody>
-        <Tfoot>
+        <TableHeader isStickyHeader={isStickyHeader} headerGroups={headerGroups} />
+        <Tbody {...getTableBodyProps()}>
+          {rows.map((row) => {
+            prepareRow(row);
+            const { key: rowKey, ...rowProps } = row.getRowProps();
+
+            if (renderRow) {
+              return renderRow({ data: row.original, rowProps: { key: rowKey, ...rowProps } });
+            }
+
+            return (
+              <Tr key={rowKey} {...rowProps}>
+                {row.cells.map((cell) => {
+                  const { key: cellKey, ...cellProps } = cell.getCellProps();
+                  return (
+                    <Td key={cellKey} {...cellProps}>
+                      {cell.render("Cell")}
+                    </Td>
+                  );
+                })}
+              </Tr>
+            );
+          })}
+        </Tbody>
+        {/* <Tfoot>
           <Tr></Tr>
-        </Tfoot>
+        </Tfoot> */}
       </Table>
     </Box>
   );

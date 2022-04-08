@@ -83,7 +83,7 @@ export default function EmployeeListItem({ id, onCheck }: EmployeeListItemProps)
   };
 
   return (
-    <Tr key={employee.id}>
+    <Tr>
       <Td>
         <Checkbox
           size="lg"
